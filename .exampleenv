@@ -1,0 +1,4 @@
+PORT=8080
+DATABASE_URL=postgres://postgres:a1b2c3d4@localhost:5432/forum
+GO_ENV=development
+JWT_SECRET_KEY=obviouslynottheactualsecretkeyee96f32c3edfb6c9880539226fb5fc59a413f713d3d22f9a5f5df0a7611c18729d257e7a7186f7d2b8afda0d14c9d4d7a5
