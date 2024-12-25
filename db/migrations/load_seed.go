@@ -19,7 +19,11 @@ func loadSeedData(seedDataDir string) error {
 
 	for _, file := range files {
 		if filepath.Ext(file.Name()) == ".json" {
+<<<<<<< HEAD
 			tableName := file.Name()[0 : len(file.Name())-5]
+=======
+			tableName := file.Name()[0:len(file.Name()) - 5]
+>>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 			filePath := filepath.Join(seedDataDir, file.Name())
 
 			err := loadAndInsertData(filePath, tableName)
@@ -50,10 +54,18 @@ func loadAndInsertData(filePath string, tableName string) error {
 	}
 	return insertData(tableName, data)
 
+<<<<<<< HEAD
 }
 
 func insertData(table string, data []map[string]any) error {
 	for _, record := range data {
+=======
+
+}
+
+func insertData(table string, data []map[string]any) error {
+	for _, record  := range data {
+>>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 		var columns []string
 		var values []any
 		for key, value := range record {
@@ -80,4 +92,8 @@ func insertData(table string, data []map[string]any) error {
 
 	}
 	return nil
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c

@@ -8,6 +8,10 @@ var (
 	pool *pgxpool.Pool
 )
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 func InitDB(db_pool *pgxpool.Pool, wantToCreateTables bool, seedDataDir string) error {
 	var err error
 	pool = db_pool
@@ -25,4 +29,8 @@ func InitDB(db_pool *pgxpool.Pool, wantToCreateTables bool, seedDataDir string) 
 		}
 	}
 	return nil
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c

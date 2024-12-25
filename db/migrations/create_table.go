@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+<<<<<<< HEAD
 func createTables() error {
 	for _, query := range createTablesQueries {
 		_, err := pool.Exec(context.Background(), query)
@@ -15,6 +16,31 @@ func createTables() error {
 	}
 
 	log.Println("All tables which schemas are specified in db/migrations/creation_queries.go exists. If wasn't there before, they have been created")
+=======
+
+func createTables() error {
+	var err error
+
+	for _, query := range createTablesQueries {
+		err = createTable(query)
+		if err != nil {
+			log.Fatalf("Error creating table with %s: %v", query, err)
+			return err
+		}
+	}
+
+	log.Println("All tables which schemas are specified in db/migrations/creation_queries.go exists. If wasn't there before, they have been created")
+	return nil
+}
+
+
+func createTable(query string) error{
+	_, err := pool.Exec(context.Background(), query)
+	if err != nil {
+		log.Fatalf("Error running %s", query)
+		return err
+	}
+>>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 	return nil
 }
 
@@ -73,4 +99,8 @@ func createTables() error {
 // 	}
 
 // 	query += ");"
+<<<<<<< HEAD
 // 	return query;
+=======
+// 	return query;
+>>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
