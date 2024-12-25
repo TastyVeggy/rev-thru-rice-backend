@@ -1,44 +1,34 @@
-package db
+package migrations
 
 import (
 	"context"
 	"log"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var (
-	conn *pgxpool.Conn
-	CreateUsersTableQuery string = `
-		CREATE TABLE IF NOT EXISTS users (
-			id SERIAL PRIMARY KEY,
-			username VARCHAR(100) UNIQUE NOT NULL,
-			email VARCHAR(100) UNIQUE NOT NULL,
-			password VARCHAR(255) NOT NULL,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			profilepic VARCHAR(255) DEFAULT ''
-		);
-	`
-)
 
-func CreateTables() {
+func createTables() error {
 	var err error
-	conn, err = Pool.Acquire(context.Background())
-	if err != nil {
-		log.Println("Error while acquiring connection from the database pool!")
+
+	for _, query := range createTablesQueries {
+		err = createTable(query)
+		if err != nil {
+			log.Fatalf("Error creating table with %s: %v", query, err)
+			return err
+		}
 	}
 
-	createTable(CreateUsersTableQuery)
-
-	defer conn.Release()
+	log.Println("All tables which schemas are specified in db/migrations/creation_queries.go exists. If wasn't there before, they have been created")
+	return nil
 }
 
-func createTable(query string) {
-	_, err := conn.Exec(context.Background(), query)
+
+func createTable(query string) error{
+	_, err := pool.Exec(context.Background(), query)
 	if err != nil {
 		log.Fatalf("Error running %s", query)
+		return err
 	}
-
+	return nil
 }
 
 // func CreateTables(){
@@ -97,4 +87,3 @@ func createTable(query string) {
 
 // 	query += ");"
 // 	return query;
-// }

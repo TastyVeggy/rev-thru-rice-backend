@@ -16,8 +16,10 @@ func main() {
 
 	dbURL := os.Getenv("DATABASE_URL")
 	port := utils.GetEnvWithDefault("PORT", "8080")
+	wantToCreateTables := utils.GetEnvWithDefault("CREATE_TABLES", "FALSE")
+	seedDataDir := os.Getenv("SEED_DATA_DIR")
 
-	db.InitPool(dbURL)
+	db.InitPool(dbURL, wantToCreateTables, seedDataDir)
 	utils.InitValidator()
 
 	e := echo.New()

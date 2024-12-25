@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Brunei",
+    "description": "Opulence meets the jungle"
+  },
+  {
+    "id": 2,
+    "name": "Cambodia",
+    "description": "Where history and adventure collides - explore ancient temples like Lara Croft"
+  },
+  {
+    "id": 3,
+    "name": "Indonesia",
+    "description": "Archipelago of endless exploration and breathtaking beauty"
+  },
+  {
+    "id": 4,
+    "name": "Malaysia",
+    "description": "From skyscrapers of Kuala Lumpur to the rainforests of Borneo"
+  },
+  {
+    "id": 5,
+    "name": "Myanmar",
+    "description": "Land of hidden pagodas and untold mysteries"
+  },
+  {
+    "id": 6,
+    "name": "Laos",
+    "description": "Serene landscapes and uncharted roads - perfect for the rider's soul"
+  },
+  {
+    "id": 7,
+    "name": "Philippines",
+    "description": "Where the ocean is always calling and the roads lead to paradise"
+  },
+  {
+    "id": 8,
+    "name": "Singapore",
+    "description": "Small metropolis where modern roads and highways provide retreat"
+  },
+  {
+    "id": 9,
+    "name": "Thailand",
+    "description": "The land of smiles, where kindess dots the roads"
+  },
+  {
+    "id": 10,
+    "name": "Vietnam",
+    "description": "Busy streets, misty mountains and winding roads, the birthplace of motorcycle adventure in SEA"
+  }
+]

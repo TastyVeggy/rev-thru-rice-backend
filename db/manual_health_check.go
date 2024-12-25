@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func PoolHealthCheckLoop(dbURL string) {
+func poolHealthCheckLoop(dbURL string) {
 	for {
 		healthy := isHealthy()
 		if !healthy {
