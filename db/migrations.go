@@ -9,6 +9,16 @@ import (
 
 var (
 	conn *pgxpool.Conn
+	CreateUsersTableQuery string = `
+		CREATE TABLE IF NOT EXISTS users (
+			id SERIAL PRIMARY KEY,
+			username VARCHAR(100) UNIQUE NOT NULL,
+			email VARCHAR(100) UNIQUE NOT NULL,
+			password VARCHAR(255) NOT NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			profilepic VARCHAR(255) DEFAULT ''
+		);
+	`
 )
 
 func CreateTables() {
@@ -17,6 +27,8 @@ func CreateTables() {
 	if err != nil {
 		log.Println("Error while acquiring connection from the database pool!")
 	}
+
+	createTable(CreateUsersTableQuery)
 
 	defer conn.Release()
 }
