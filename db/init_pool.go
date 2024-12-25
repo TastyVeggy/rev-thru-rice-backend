@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/TastyVeggy/rev-thru-rice-backend/db/migrations"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -45,13 +46,17 @@ func initialisePool(dbURL string) error {
 	return nil
 }
 
-func InitPool(dbURL string) {
+func InitPool(dbURL string, wantToCreateTables string, seedDataDir string) {
 	err := initialisePool(dbURL)
 	if err != nil {
 		log.Fatalf("Could not initialise database: %v", err)
 	}
 
-	CreateTables()
-	go PoolHealthCheckLoop(dbURL)
+	if wantToCreateTables == "TRUE" {
+		migrations.InitDB(Pool, true, seedDataDir)
+	} else {
+		migrations.InitDB(Pool, false, seedDataDir)
+	}
+	go poolHealthCheckLoop(dbURL)
 	go waitForShutdown()
 }

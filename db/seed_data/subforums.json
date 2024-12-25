@@ -1,0 +1,23 @@
+[
+  { "id": 1, "name": "Rental Shops", "description": "Find bike rental shops" },
+  {
+    "id": 2,
+    "name": "Repair Shops",
+    "description": "Find motorbike repair shops"
+  },
+  {
+    "id": 3,
+    "name": "Buy/Sell Bikes",
+    "description": "Marketplace for travellers to buy and sell bikes"
+  },
+  {
+    "id": 4,
+    "name": "Tips & Tricks",
+    "description": "Share travel tips and tricks"
+  },
+  {
+    "id": 5,
+    "name": "Traveller Stories",
+    "description": "Share your crazy experiences"
+  }
+]
