@@ -9,11 +9,7 @@ var createTablesQueries = [...]string{
 			email VARCHAR(100) UNIQUE NOT NULL,
 			password VARCHAR(255) NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-<<<<<<< HEAD
 			profile_pic VARCHAR(255) DEFAULT ''
-=======
-			profilepic VARCHAR(255) DEFAULT ''
->>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 		);
 	`,
 	// Countries
@@ -32,7 +28,6 @@ var createTablesQueries = [...]string{
 			description TEXT
 		);
 	`,
-<<<<<<< HEAD
 	// Posts
 	`
 		CREATE TABLE IF NOT EXISTS posts (
@@ -47,13 +42,10 @@ var createTablesQueries = [...]string{
 			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 		);
 	`,
-=======
->>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 	// Shops
 	`
 		CREATE TABLE IF NOT EXISTS shops (
 			id SERIAL PRIMARY KEY,
-<<<<<<< HEAD
 			post_id INT NOT NULL,
 			name VARCHAR(255) NOT NULL,
 			location VARCHAR(255) NOT NULL,
@@ -74,17 +66,6 @@ var createTablesQueries = [...]string{
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
 			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-=======
-			title VARCHAR(255) NOT NULL,
-			description TEXT,
-			location VARCHAR(255) NOT NULL,
-			country_id INT NOT NULL,
-			rating DECIMAL(3,2),
-			subforum_id INT NOT NULL,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (country_id) REFERENCES countries(id),
-			FOREIGN KEY (subforum_id) REFERENCES subforums(id)
->>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 		);
 	`,
 	// Ratings
@@ -93,7 +74,6 @@ var createTablesQueries = [...]string{
 			id SERIAL PRIMARY KEY,
 			shop_id INT NOT NULL,
 			user_id INT NOT NULL,
-<<<<<<< HEAD
 			score DECIMAL(1,0) NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE,
@@ -214,45 +194,4 @@ var createTablesQueries = [...]string{
 		CREATE INDEX IF NOT EXISTS idx_ratings_shop_post_id
 		ON ratings(shop_id)
 	`,
-=======
-			rating DECIMAL(2,1) NOT NULL,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (shop_id) REFERENCES shops(id),
-			FOREIGN KEY (user_id) REFERENCES users(id)
-		);
-	`,
-	// Posts
-	`
-		CREATE TABLE IF NOT EXISTS posts (
-			id SERIAL PRIMARY KEY, 
-			subforum_id INT NOT NULL,
-			title VARCHAR(255) NOT NULL,
-			content TEXT NOT NULL,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (subforum_id) REFERENCES subforums(id)
-		);
-	`,
-	// Comments
-	`
-		CREATE TABLE IF NOT EXISTS comments (
-			id SERIAL PRIMARY KEY,
-			post_id INT NOT NULL,
-			user_id INT NOT NULL,
-			content TEXT NOT NULL,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (post_id) REFERENCES posts(id),
-			FOREIGN KEY (user_id) REFERENCES users(id)
-		);
-	`,
-	// Post_Country join table
-	`
-		CREATE TABLE IF NOT EXISTS post_country (
-			post_id INT NOT NULL,
-			country_id INT NOT NULL,
-			PRIMARY key (post_id, country_id),
-			FOREIGN KEY (post_id) REFERENCES posts(id),
-			FOREIGN KEY (country_id) REFERENCES countries(id)
-		);
-	`,
->>>>>>> 0c747eda8b993aa85bea67e3eacdcb732218ff0c
 }
