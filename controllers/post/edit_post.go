@@ -33,7 +33,7 @@ func EditPost(c echo.Context) error {
 
 	// If no rows affected, it means that current user requesting for changing does not tally with the user_id associated with the post
 	if RowsAffectedCount == 0 {
-		return c.String(http.StatusUnauthorized, "You cannot change other people's post")
+		return c.String(http.StatusUnauthorized, "You cannot change other people's post or post not found")
 	}
 	return c.String(http.StatusOK, "Post updated successfully")
 
