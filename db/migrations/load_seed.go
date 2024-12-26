@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+// It only insert data that is not already on the table
+// It will not delete rows to match with the seed data
 func loadSeedData(seedDataDir string) error {
 	files, err := os.ReadDir(seedDataDir)
 	if err != nil {

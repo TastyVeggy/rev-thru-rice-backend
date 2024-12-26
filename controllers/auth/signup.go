@@ -11,16 +11,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type SignupDTO struct {
-	Username        string `json:"username" validate:"required,min=3,max=30"`
-	Email           string `json:"email" validate:"required,email"`
-	Password        string `json:"password" validate:"required,min=6"`
-	ConfirmPassword string `json:"confirmPassword" validate:"required,eqfield=Password"`
-}
+// JSON Request body
+// - username
+// - email
+// - password
+// - confirm_password
 
 func Signup(c echo.Context) error {
 	var err error
-	user := new(SignupDTO)
+	user := new(models.UserReqDTO)
 	if err = c.Bind(user); err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Signup bad request: %v", err))
 	}
@@ -55,12 +54,12 @@ func Signup(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Email has been taken")
 	}
 
-	err = models.AddUser(user.Username, user.Email, user.Password)
+	err = models.AddUser(user)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error adding new user: %v", err))
 	}
 
-	userID, err := models.FindValueByColumn("username", user.Username, "id")
+	userID, err := models.GetUserID(user.Username)
 	if err != nil {
 		return c.String(http.StatusOK, user.Username+" has been successfully added but unable to generate JWT token")
 	}

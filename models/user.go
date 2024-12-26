@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,12 +12,19 @@ import (
 )
 
 type User struct {
-	ID         int    `json:"id"`
+	ID         int       `json:"id"`
 	Username   string    `json:"username"`
 	Email      string    `json:"email"`
 	Password   string    `json:"password"`
 	CreatedAt  time.Time `json:"created_at"`
 	ProfilePic string    `json:"profile_pic"`
+}
+
+type UserReqDTO struct {
+	Username        string `json:"username" validate:"required,min=3,max=30"`
+	Email           string `json:"email" validate:"required,email"`
+	Password        string `json:"password" validate:"required,min=6"`
+	ConfirmPassword string `json:"confirm_password" validate:"required,eqfield=Password"`
 }
 
 func Exists(field string, value string) (bool, error) {
@@ -30,30 +38,42 @@ func Exists(field string, value string) (bool, error) {
 	return exists, err
 }
 
-func FindValueByColumn(searchCol string, searchVal string, returnCol string) (string, error) {
+func GetUserID(username string) (int, error) {
+	var result int
 
-	var result string
-
-	query := fmt.Sprintf("SELECT %s FROM users where %s = $1", returnCol, searchCol)
-	err := db.Pool.QueryRow(context.Background(), query, searchVal).Scan(&result)
+	query := "SELECT id FROM users WHERE username = $1"
+	err := db.Pool.QueryRow(context.Background(), query, username).Scan(&result)
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return result, fmt.Errorf("no record for searchVal: %v", err)
-
+			return result, errors.New("username does not exist")
 		}
 		return result, err
 	}
 	return result, nil
 }
 
-func AddUser(username string, email string, password string) error {
-	hashedPassword, err := utils.HashPassword(password)
+func GetPassword(username string) (string, error) {
+	var result string
+	query := "SELECT password FROM users WHERE username = $1"
+	err := db.Pool.QueryRow(context.Background(), query, username).Scan(&result)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return result, errors.New("username does not exist")
+		}
+		return result, err
+	}
+	return result, nil
+}
+
+func AddUser(user *UserReqDTO) error {
+	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Pool.Exec(context.Background(), "INSERT INTO users(username, email, password) VALUES ($1,$2,$3)", username, email, string(hashedPassword))
+	_, err = db.Pool.Exec(context.Background(), "INSERT INTO users(username, email, password) VALUES ($1,$2,$3)", user.Username, user.Email, string(hashedPassword))
 	if err != nil {
 		return err
 	}

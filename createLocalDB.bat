@@ -1,1 +1,1 @@
-docker run -it --name echo_postgres -e POSTGRES_PASSWORD=a1b2c3d4 -d -p 5432:5432 postgres
+docker run -it --name rev-thru-rice-postgres -e POSTGRES_PASSWORD=a1b2c3d4 -d -p 5432:5432 postgres

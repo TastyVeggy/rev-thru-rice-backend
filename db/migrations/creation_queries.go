@@ -50,10 +50,11 @@ var createTablesQueries = [...]string{
 			name VARCHAR(255) NOT NULL,
 			location VARCHAR(255) NOT NULL,
 			address VARCHAR(255) NOT NULL,
-			country_id INT NOT NULL,
 			avg_rating DECIMAL(2,1) DEFAULT NULL,
+			country_id INT NOT NULL,
+			type VARCHAR(255) NOT NULL,
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-			FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
+			FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE,
 		);
 	`,
 	// Comments
@@ -85,7 +86,9 @@ var createTablesQueries = [...]string{
 	`
 		CREATE TABLE IF NOT EXISTS photos (
 			id SERIAL PRIMARY KEY,
-			url VARCHAR(255) NOT NULL
+			url VARCHAR(255) NOT NULL,
+			context VARCHAR(255) NOT NULL,
+			context_id INT NOT NULL
 		)
 	`,
 	// Link post and country
@@ -97,26 +100,6 @@ var createTablesQueries = [...]string{
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
 			FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
 		);
-	`,
-	// Link post and photo
-	`
-		CREATE TABLE IF NOT EXISTS post_photo (
-			post_id INT NOT NULL,
-			photo_id INT NOT NULL,
-			PRIMARY KEY (post_id, photo_id),
-			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-			FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE
-		)
-	`,
-	// Link comments and photos
-	`
-		CREATE TABLE IF NOT EXISTS comment_photo (
-			comment_id INT NOT NULL,
-			photo_id INT NOT NULL,
-			PRIMARY KEY (comment_id, photo_id),
-			FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
-			FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE
-		)
 	`,
 	// Trigger to update average rating in 'shop_posts' table
 	`

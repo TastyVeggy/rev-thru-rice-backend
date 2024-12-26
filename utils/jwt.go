@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -9,7 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GenerateJWTandSetCookie(userID string, c echo.Context) error {
+type Claims struct {
+	UserID int `json:"user_id"`
+	jwt.RegisteredClaims
+}
+
+func GenerateJWTandSetCookie(userID int, c echo.Context) error {
 	token, err := generateJWT(userID)
 	if err != nil {
 		return err
@@ -36,12 +42,37 @@ func RemoveJWTCookie(c echo.Context) {
 	})
 }
 
-func generateJWT(userID string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"iss": "my_server",
-			"sub": userID,
-		})
+func generateJWT(userID int) (string, error) {
+	claims := &Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "rev-thru-rice",
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+}
+
+func ParseJWT(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		// Ensure the signing method is as expected
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract and return the claims
+	claims, ok := token.Claims.(*Claims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
 }
