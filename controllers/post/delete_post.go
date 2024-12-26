@@ -9,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// does not truly delete post, just set everything to null except id so comments remain
 func DeletePost(c echo.Context) error {
 	userID := c.Get("user").(int)
 	postID, err := strconv.Atoi(c.Param("id"))

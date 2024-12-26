@@ -24,10 +24,13 @@ func main() {
 	// login/logout/signup
 	authRoutes := e.Group("/auth")
 	routes.AuthRoutes(authRoutes)
-	// viewing posts/ shops is public
-	postRoutes := e.Group("/post")
+	// viewing posts is public
+	postRoutes := e.Group("/posts")
 	routes.PostRoutes(postRoutes)
-	//
+	// viewing comments is public
+	commentRoutes := e.Group("/comments")
+	routes.CommentRoutes(commentRoutes)
+
 	// countryRoutes := e.Group("/countries")
 	// routes.CountryRoutes(countryRoutes)
 
@@ -35,13 +38,17 @@ func main() {
 	protected := e.Group("/protected")
 	protected.Use(middleware.JWT)
 
-	// user profile
-	// userRoutes := protected.Group("/user")
-	// routes.UserRoutes(userRoutes)
 
 	// Making/Deleting posts/comments requires auth
-	protectedPostRoutes := protected.Group("/post")
+	protectedPostRoutes := protected.Group("/posts")
 	routes.ProtectedPostRoutes(protectedPostRoutes)
+
+	protectedCommentsRoutes := protected.Group("/comments")
+	routes.ProtectedCommentRoutes(protectedCommentsRoutes)
+
+	// Profile settings
+	// protectedUserRoutes := protected.Group("/users")
+	// routes.ProtectedUserRoutes(protectedUserRoutes)
 
 	// Making/Deleting shops/ratings require auth
 	// protectedShopRoutes := protected.Group("/shop")

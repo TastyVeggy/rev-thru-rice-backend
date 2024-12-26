@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
@@ -101,7 +102,7 @@ func FetchPostByID(postID int) (PostResDTO, error) {
 	return post, nil
 }
 
-func FetchPosts(limit int, offset int, subforumID int) ([]PostResDTO, error) {
+func FetchPosts(limit int, offset int, subforumID int, userID int) ([]PostResDTO, error) {
 	var (
 		posts []PostResDTO
 		post  PostResDTO
@@ -114,14 +115,24 @@ func FetchPosts(limit int, offset int, subforumID int) ([]PostResDTO, error) {
 		FROM posts 
 		JOIN users ON posts.user_id=users.id
 	`
+	params := []interface{}{}
+	placeholderIndex := 1
 
-	if subforumID == -1 {
-		query += "ORDER BY created_at DESC LIMIT $1 OFFSET $2"
-		rows, err = db.Pool.Query(context.Background(), query, limit, offset)
-	} else {
-		query += "WHERE subforum_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
-		rows, err = db.Pool.Query(context.Background(), query, subforumID, limit, offset)
+	if subforumID != -1 {
+		query += fmt.Sprintf(" AND posts.subforum_id = $%d", placeholderIndex)
+		params = append(params, subforumID)
+		placeholderIndex++
 	}
+	if userID != -1 {
+		query += fmt.Sprintf(" AND posts.user_id=$%d", placeholderIndex)
+		params = append(params, userID)
+		placeholderIndex++
+	}
+
+	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", placeholderIndex, placeholderIndex + 1)
+	params = append(params, limit, offset)
+
+	rows, err = db.Pool.Query(context.Background(), query, params...)
 
 	if err != nil {
 		return nil, err

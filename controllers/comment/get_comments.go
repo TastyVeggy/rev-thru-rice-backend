@@ -1,4 +1,4 @@
-package post
+package comment
 
 import (
 	"fmt"
@@ -9,11 +9,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetPosts(c echo.Context) error {
+
+func GetComments(c echo.Context) error {
 	page := c.QueryParam("page")
 	limit := c.QueryParam("limit")
-	subforumIDString := c.QueryParam("subforum_id")
-	userIDString := c.QueryParam("user_id") // posts from this user
+	postIDString := c.QueryParam("post_id")
+	userIDString := c.QueryParam("user_id") // comments from this user
 
 	if page == "" {
 		page = "1"
@@ -21,9 +22,9 @@ func GetPosts(c echo.Context) error {
 	if limit == "" {
 		limit = "10"
 	}
-	// default to -1, which means just all posts
-	if subforumIDString == "" {
-		subforumIDString = "-1"
+	// default to -1, which means just all comments
+	if postIDString == "" {
+		postIDString = "-1"
 	}
 	if userIDString == ""{
 		userIDString = "-1"
@@ -40,9 +41,9 @@ func GetPosts(c echo.Context) error {
 		limitNum = 10
 	}
 
-	subforumID, err := strconv.Atoi(subforumIDString)
+	postID, err := strconv.Atoi(postIDString)
 	if err != nil {
-		subforumID = -1
+		postID = -1
 	}
 	userID, err := strconv.Atoi(userIDString)
 	if err != nil {
@@ -51,9 +52,9 @@ func GetPosts(c echo.Context) error {
 
 	offset := (pageNum - 1) * limitNum
 
-	posts, err := models.FetchPosts(limitNum, offset, subforumID, userID)
+	posts, err := models.FetchComments(limitNum, offset, postID, userID)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch posts: %v", err))
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch comments: %v", err))
 	}
 
 	res := map[string]any{
