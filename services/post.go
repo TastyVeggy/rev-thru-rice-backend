@@ -12,15 +12,15 @@ import (
 
 type PostResDTO struct {
 	models.Post
-	Username string `json:"username"`
+	Username  string   `json:"username"`
 	Countries []string `json:"countries"`
 }
 
 type PostReqDTO struct {
-	SubforumID int    `json:"subforum_id"`
-	Title      string `json:"title"`
-	Content    string `json:"content"`
-	Countries []string `json:"countries"`
+	SubforumID int      `json:"subforum_id"`
+	Title      string   `json:"title"`
+	Content    string   `json:"content"`
+	Countries  []string `json:"countries"`
 }
 
 // for generic posts (not shop subforums)
@@ -32,7 +32,7 @@ func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
 	}
 	defer tx.Rollback(context.Background())
 	postRes, err = addPostInTx(tx, post, userID)
-	
+
 	if err != nil {
 		return postRes, err
 	}
@@ -41,9 +41,6 @@ func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
 
 	return postRes, err
 }
-
-
-
 
 func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	var postRes PostResDTO
@@ -217,7 +214,7 @@ func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
 		err := tx.QueryRow(context.Background(), "SELECT id FROM countries where name =$1", country).Scan(&countryID)
 
 		if err != nil {
-			if err.Error() == "no rows in result set"{
+			if err.Error() == "no rows in result set" {
 				return postRes, fmt.Errorf("country not part of list")
 			} else {
 				return postRes, err

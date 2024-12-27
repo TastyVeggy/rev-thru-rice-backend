@@ -25,7 +25,7 @@ type ShopPostResDTO struct {
 func AddShopPost(shopPost *ShopPostReqDTO, userID int) (ShopPostResDTO, error) {
 	var shopPostRes ShopPostResDTO
 
-	if len(shopPost.Post.Countries) > 0{
+	if len(shopPost.Post.Countries) > 0 {
 		return shopPostRes, fmt.Errorf("should not have any countries in shop post request, country is determined via lat long")
 	}
 
@@ -36,7 +36,6 @@ func AddShopPost(shopPost *ShopPostReqDTO, userID int) (ShopPostResDTO, error) {
 	}
 
 	shopPost.Post.Countries = append(shopPost.Post.Countries, location.Country)
-
 
 	// Begin the process of adding post, shop and rating
 	tx, err := db.Pool.Begin(context.Background())

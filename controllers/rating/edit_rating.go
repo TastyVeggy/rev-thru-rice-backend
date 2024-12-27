@@ -33,7 +33,7 @@ func EditRating(c echo.Context) error {
 
 	res := map[string]any{
 		"message": "Rating updated successfully",
-		"rating": ratingRes,
+		"rating":  ratingRes,
 	}
 
 	return c.JSON(http.StatusOK, res)

@@ -23,10 +23,9 @@ func CreateShopPost(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to create shop post: %v", err))
 	}
 
-
 	res := map[string]any{
-		"message": "Shop post successfully added",
-		"shop_post":    shopPostRes,
+		"message":   "Shop post successfully added",
+		"shop_post": shopPostRes,
 	}
 	return c.JSON(http.StatusOK, res)
 

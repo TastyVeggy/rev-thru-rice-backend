@@ -22,10 +22,10 @@ func AddRating(rating *RatingReqDTO, shopID int, userID int) (RatingResDTO, erro
 	return addRatingInTx(nil, rating, shopID, userID)
 }
 
-func FetchRatingByShopandUser(shopID int, userID int)(RatingResDTO, error){
-	var ratingRes RatingResDTO 
+func FetchRatingByShopandUser(shopID int, userID int) (RatingResDTO, error) {
+	var ratingRes RatingResDTO
 
-	query :=`
+	query := `
 		SELECT ratings.*, shops.name, users.username 
 		FROM ratings
 		JOIN shops on ratings.shop_id = shops.id
@@ -34,9 +34,9 @@ func FetchRatingByShopandUser(shopID int, userID int)(RatingResDTO, error){
 	`
 
 	err := db.Pool.QueryRow(
-		context.Background(), 
-		query, 
-		shopID, 
+		context.Background(),
+		query,
+		shopID,
 		userID,
 	).Scan(
 		&ratingRes.ID,
@@ -51,7 +51,7 @@ func FetchRatingByShopandUser(shopID int, userID int)(RatingResDTO, error){
 	return ratingRes, err
 }
 
-func UpdateRating(rating *RatingReqDTO, userID int, shopID int) (RatingResDTO, error){
+func UpdateRating(rating *RatingReqDTO, userID int, shopID int) (RatingResDTO, error) {
 	var ratingRes RatingResDTO
 	query := `
 		WITH new_rating AS (
@@ -67,11 +67,11 @@ func UpdateRating(rating *RatingReqDTO, userID int, shopID int) (RatingResDTO, e
 	`
 
 	err := db.Pool.QueryRow(
-		context.Background(), 
-		query, 
+		context.Background(),
+		query,
 		rating.Score,
 		userID,
-		shopID, 
+		shopID,
 	).Scan(
 		&ratingRes.ID,
 		&ratingRes.ShopID,
@@ -85,7 +85,7 @@ func UpdateRating(rating *RatingReqDTO, userID int, shopID int) (RatingResDTO, e
 	return ratingRes, err
 }
 
-func RemoveRating(shopID int, userID int) (int64, error){
+func RemoveRating(shopID int, userID int) (int64, error) {
 	query := `
 		DELETE FROM ratings
 		WHERE user_id=$1 AND shop_id=$2
@@ -97,7 +97,6 @@ func RemoveRating(shopID int, userID int) (int64, error){
 	return commandTag.RowsAffected(), err
 
 }
-
 
 func addRatingInTx(tx pgx.Tx, rating *RatingReqDTO, shopID int, userID int) (RatingResDTO, error) {
 	var ratingRes RatingResDTO
