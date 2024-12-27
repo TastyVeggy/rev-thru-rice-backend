@@ -23,7 +23,7 @@ func EditPost(c echo.Context) error {
 
 	userID := c.Get("user").(int)
 
-	postRes, err := services.EditPost(newPost, postID, userID)
+	postRes, err := services.UpdatePost(newPost, postID, userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
 			return c.String(http.StatusUnauthorized, "You cannot change other people's post or post not found")

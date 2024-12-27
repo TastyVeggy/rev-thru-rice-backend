@@ -23,7 +23,7 @@ func EditComment(c echo.Context) error {
 
 	userID := c.Get("user").(int)
 
-	commentRes, err := services.EditComment(newComment, userID, commentID)
+	commentRes, err := services.UpdateComment(newComment, userID, commentID)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
 			return c.String(http.StatusUnauthorized, "You cannot change other people's comment or comment not found")

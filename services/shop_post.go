@@ -45,17 +45,17 @@ func AddShopPost(shopPost *ShopPostReqDTO, userID int) (ShopPostResDTO, error) {
 	}
 	defer tx.Rollback(context.Background())
 
-	shopPostRes.Post, err = AddPostInTx(tx, &shopPost.Post, userID)
+	shopPostRes.Post, err = addPostInTx(tx, &shopPost.Post, userID)
 	if err != nil {
 		return shopPostRes, fmt.Errorf("error adding post: %v", err)
 	}
 
-	shopPostRes.Shop, err = AddShopInTx(tx, &shopPost.Shop, location, userID, shopPostRes.Post.ID)
+	shopPostRes.Shop, err = addShopInTx(tx, &shopPost.Shop, location, userID, shopPostRes.Post.ID)
 	if err != nil {
 		return shopPostRes, fmt.Errorf("error adding shop: %v", err)
 	}
 
-	shopPostRes.Rating, err = AddRatingInTx(tx, &shopPost.Rating, shopPostRes.Shop.ID, userID)
+	shopPostRes.Rating, err = addRatingInTx(tx, &shopPost.Rating, shopPostRes.Shop.ID, userID)
 	if err != nil {
 		return shopPostRes, fmt.Errorf("error adding rating: %v", err)
 	}

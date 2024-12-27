@@ -51,7 +51,7 @@ func AddComment(comment *CommentReqDTO, userID int, postID int) (CommentResDTO, 
 	return commentRes, err
 }
 
-func EditComment(comment *CommentReqDTO, userID int, commentID int) (CommentResDTO, error) {
+func UpdateComment(comment *CommentReqDTO, userID int, commentID int) (CommentResDTO, error) {
 	var commentRes CommentResDTO
 	query := `
 		WITH new_comment AS (

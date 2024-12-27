@@ -30,10 +30,10 @@ func AddShop(shop *ShopReqDTO, userID int, postID int) (ShopResDTO, error) {
 	if err != nil {
 		return shopRes, fmt.Errorf("error in getting location: %v", err)
 	}
-	return AddShopInTx(nil, shop, location, userID, postID)
+	return addShopInTx(nil, shop, location, userID, postID)
 }
 
-func AddShopInTx(tx pgx.Tx, shop *ShopReqDTO, location *utils.Location, userID int, postID int) (ShopResDTO, error) {
+func addShopInTx(tx pgx.Tx, shop *ShopReqDTO, location *utils.Location, userID int, postID int) (ShopResDTO, error) {
 
 	var shopRes ShopResDTO
 

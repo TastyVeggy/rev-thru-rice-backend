@@ -31,7 +31,7 @@ func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
 		return postRes, fmt.Errorf("unable to start post transaction: %v", err)
 	}
 	defer tx.Rollback(context.Background())
-	postRes, err = AddPostInTx(tx, post, userID)
+	postRes, err = addPostInTx(tx, post, userID)
 	
 	if err != nil {
 		return postRes, err
@@ -44,76 +44,8 @@ func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
 
 
 
-func AddPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
-	var postRes PostResDTO
 
-	if tx == nil {
-		return postRes, errors.New("needs to be part of transaction due to multiple queries required")
-	}
-	post_query := `
-		WITH new_post AS (
-			INSERT INTO posts (subforum_id, user_id, title, content)
-			VALUES ($1, $2, $3, $4)
-			RETURNING *
-		)
-		SELECT new_post.*, users.username
-		FROM new_post
-		JOIN users ON  new_post.user_id = users.id
-	`
-
-	row := tx.QueryRow(
-		context.Background(),
-		post_query,
-		post.SubforumID,
-		userID,
-		post.Title,
-		post.Content,
-	)
-
-	err := row.Scan(
-		&postRes.ID,
-		&postRes.SubforumID,
-		&postRes.UserID,
-		&postRes.Title,
-		&postRes.Content,
-		&postRes.CommentCount,
-		&postRes.CreatedAt,
-		&postRes.Username,
-	)
-
-	// handling of countries
-	for _, country := range post.Countries {
-		var countryID int
-
-		// To check if country is valid
-		err := tx.QueryRow(context.Background(), "SELECT id FROM countries where name =$1", country).Scan(&countryID)
-
-		if err != nil {
-			if err.Error() == "no rows in result set"{
-				return postRes, fmt.Errorf("country not part of list")
-			} else {
-				return postRes, err
-			}
-		}
-
-		// Insertion into link table betwen post and country
-		_, err = tx.Exec(
-			context.Background(),
-			"INSERT INTO post_country (post_id, country_id) VALUES ($1, $2)",
-			postRes.ID,
-			countryID,
-		)
-
-		if err != nil {
-			return postRes, fmt.Errorf("error inserting into post_country link table")
-		}
-		postRes.Countries = append(postRes.Countries, country)
-	}
-
-	return postRes, err
-}
-
-func EditPost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
+func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	var postRes PostResDTO
 	query := `
 		WITH new_post AS (
@@ -238,4 +170,73 @@ func FetchPosts(limit int, offset int, subforumID int, userID int) ([]PostResDTO
 		posts = append(posts, post)
 	}
 	return posts, nil
+}
+
+func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
+	var postRes PostResDTO
+
+	if tx == nil {
+		return postRes, errors.New("needs to be part of transaction due to multiple queries required")
+	}
+	post_query := `
+		WITH new_post AS (
+			INSERT INTO posts (subforum_id, user_id, title, content)
+			VALUES ($1, $2, $3, $4)
+			RETURNING *
+		)
+		SELECT new_post.*, users.username
+		FROM new_post
+		JOIN users ON  new_post.user_id = users.id
+	`
+
+	row := tx.QueryRow(
+		context.Background(),
+		post_query,
+		post.SubforumID,
+		userID,
+		post.Title,
+		post.Content,
+	)
+
+	err := row.Scan(
+		&postRes.ID,
+		&postRes.SubforumID,
+		&postRes.UserID,
+		&postRes.Title,
+		&postRes.Content,
+		&postRes.CommentCount,
+		&postRes.CreatedAt,
+		&postRes.Username,
+	)
+
+	// handling of countries
+	for _, country := range post.Countries {
+		var countryID int
+
+		// To check if country is valid
+		err := tx.QueryRow(context.Background(), "SELECT id FROM countries where name =$1", country).Scan(&countryID)
+
+		if err != nil {
+			if err.Error() == "no rows in result set"{
+				return postRes, fmt.Errorf("country not part of list")
+			} else {
+				return postRes, err
+			}
+		}
+
+		// Insertion into link table betwen post and country
+		_, err = tx.Exec(
+			context.Background(),
+			"INSERT INTO post_country (post_id, country_id) VALUES ($1, $2)",
+			postRes.ID,
+			countryID,
+		)
+
+		if err != nil {
+			return postRes, fmt.Errorf("error inserting into post_country link table")
+		}
+		postRes.Countries = append(postRes.Countries, country)
+	}
+
+	return postRes, err
 }
