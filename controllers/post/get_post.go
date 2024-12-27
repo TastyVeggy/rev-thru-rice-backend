@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -13,7 +13,7 @@ func GetPost(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Can't convert post id parameter to integer")
 	}
-	post, err := models.FetchPostByID(postID)
+	post, err := services.FetchPostByID(postID)
 	if err != nil {
 		return c.String(http.StatusNotFound, "Post not found")
 	}

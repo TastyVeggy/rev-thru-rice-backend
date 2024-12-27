@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -52,7 +52,7 @@ func GetComments(c echo.Context) error {
 
 	offset := (pageNum - 1) * limitNum
 
-	posts, err := models.FetchComments(limitNum, offset, postID, userID)
+	posts, err := services.FetchComments(limitNum, offset, postID, userID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch comments: %v", err))
 	}

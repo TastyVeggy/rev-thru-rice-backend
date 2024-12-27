@@ -54,8 +54,9 @@ var createTablesQueries = [...]string{
 			lat DOUBLE PRECISION NOT NULL,
 			long DOUBLE PRECISION NOT NULL,
 			address VARCHAR(255),
+			map_link VARCHAR(255) NOT NULL,
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-			FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE,
+			FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
 		);
 	`,
 	// Comments

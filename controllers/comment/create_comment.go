@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,12 +17,12 @@ func CreateComment(c echo.Context) error {
 
 	userID := c.Get("user").(int)
 
-	comment := new(models.CommentReqDTO)
+	comment := new(services.CommentReqDTO)
 	if err := c.Bind(comment); err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Bad post request: %v", err))
 	}
 
-	err = models.AddComment(comment, userID, postID)
+	err = services.AddComment(comment, userID, postID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to insert comment: %v", err))
 	}

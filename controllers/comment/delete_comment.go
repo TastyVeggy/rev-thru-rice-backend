@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,7 +16,7 @@ func DeleteComment(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Can't convert comment id parameter to integer")
 	}
 
-	RowsDeletedCount, err := models.RemoveComment(commentID, userID)
+	RowsDeletedCount, err := services.RemoveComment(commentID, userID)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete comment: %v", err))

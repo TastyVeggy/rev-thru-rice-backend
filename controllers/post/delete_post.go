@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,7 +16,7 @@ func DeletePost(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Can't convert post id parameter to integer")
 	}
 
-	RowsDeletedCount, err := models.RemovePost(postID, userID)
+	RowsDeletedCount, err := services.RemovePost(postID, userID)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete post: %v", err))

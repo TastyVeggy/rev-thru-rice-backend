@@ -54,6 +54,7 @@ func main() {
 	// protectedShopRoutes := protected.Group("/shop")
 	// routes.ProtectedShopRoutes(protectedShopRoutes)
 
+
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})

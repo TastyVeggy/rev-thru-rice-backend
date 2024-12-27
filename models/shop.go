@@ -8,6 +8,7 @@ type Shop struct {
 	CountryID int     `json:"country_id"`
 	Type    int     `json:"type"`
 	Lat float64 `json:"lat"`
-	Long float64 `json:"long"`
+	Lng float64 `json:"lng"`
 	Address string `json:"address"`
+	MapLink string `json:"map_link"`
 }

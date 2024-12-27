@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -51,7 +51,7 @@ func GetPosts(c echo.Context) error {
 
 	offset := (pageNum - 1) * limitNum
 
-	posts, err := models.FetchPosts(limitNum, offset, subforumID, userID)
+	posts, err := services.FetchPosts(limitNum, offset, subforumID, userID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch posts: %v", err))
 	}

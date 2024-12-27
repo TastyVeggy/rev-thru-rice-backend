@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -19,7 +19,7 @@ import (
 
 func Signup(c echo.Context) error {
 	var err error
-	user := new(models.UserReqDTO)
+	user := new(services.SignupReqDTO)
 	if err = c.Bind(user); err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Signup bad request: %v", err))
 	}
@@ -38,11 +38,11 @@ func Signup(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Confirm Password does not match")
 	}
 
-	userExists, err := models.Exists("username", user.Username)
+	userExists, err := services.Exists("username", user.Username)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to verify if username has been taken: %v", err))
 	}
-	emailExists, err := models.Exists("email", user.Email)
+	emailExists, err := services.Exists("email", user.Email)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to verify if email has been taken: %v", err))
 	}
@@ -54,12 +54,12 @@ func Signup(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Email has been taken")
 	}
 
-	err = models.AddUser(user)
+	err = services.AddUser(user)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error adding new user: %v", err))
 	}
 
-	userID, err := models.GetUserID(user.Username)
+	userID, err := services.FetchUserIDbyUsername(user.Username)
 	if err != nil {
 		return c.String(http.StatusOK, user.Username+" has been successfully added but unable to generate JWT token")
 	}

@@ -5,26 +5,24 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
-// JSON request body
-// - content
 func EditComment(c echo.Context) error {
 	commentID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Can't convert comment id parameter to integer")
 	}
 
-	newComment := new(models.CommentReqDTO)
+	newComment := new(services.CommentReqDTO)
 	if err := c.Bind(newComment); err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Bad put request: %v", err))
 	}
 
 	userID := c.Get("user").(int)
 
-	RowsAffectedCount, err := models.EditComment(newComment, userID, commentID)
+	RowsAffectedCount, err := services.EditComment(newComment, userID, commentID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to update comment: %v", err))
 	}

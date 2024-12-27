@@ -5,28 +5,24 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TastyVeggy/rev-thru-rice-backend/models"
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
 )
 
-// JSON request body
-// - subforum_id
-// - title
-// - content
 func EditPost(c echo.Context) error {
 	postID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Can't convert post id parameter to integer")
 	}
 
-	newPost := new(models.PostReqDTO)
+	newPost := new(services.PostReqDTO)
 	if err := c.Bind(newPost); err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Bad put request: %v", err))
 	}
 
-	newPost.UserID = c.Get("user").(int)
+	userID := c.Get("user").(int)
 
-	RowsAffectedCount, err := models.EditPost(postID, newPost)
+	RowsAffectedCount, err := services.EditPost(newPost, postID, userID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to update post: %v", err))
 	}
