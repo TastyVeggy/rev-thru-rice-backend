@@ -6,7 +6,6 @@ import (
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
 	"github.com/TastyVeggy/rev-thru-rice-backend/models"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type RatingReqDTO struct {
@@ -20,10 +19,10 @@ type RatingResDTO struct {
 }
 
 func AddRating(rating *RatingReqDTO, shopID int, userID int) (RatingResDTO, error) {
-	return AddRatinginTx(nil, rating, shopID, userID)
+	return AddRatingInTx(nil, rating, shopID, userID)
 }
 
-func AddRatinginTx(tx *pgxpool.Tx, rating *RatingReqDTO, shopID int, userID int) (RatingResDTO, error) {
+func AddRatingInTx(tx pgx.Tx, rating *RatingReqDTO, shopID int, userID int) (RatingResDTO, error) {
 	var ratingRes RatingResDTO
 	query := `
 		WITH new_rating AS (

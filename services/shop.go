@@ -8,7 +8,6 @@ import (
 	"github.com/TastyVeggy/rev-thru-rice-backend/models"
 	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ShopReqDTO struct {
@@ -24,22 +23,26 @@ type ShopResDTO struct {
 	Country   string `json:"country"`
 }
 
-func AddShop(shop *ShopReqDTO, userID int, postID int) (any, error) {
-	return AddShopinTx(nil, shop, userID, postID)
-}
-
-func AddShopinTx(tx *pgxpool.Tx, shop *ShopReqDTO, userID int, postID int) (any, error) {
+func AddShop(shop *ShopReqDTO, userID int, postID int) (ShopResDTO, error) {
 	var shopRes ShopResDTO
 
 	location, err := utils.GetShopLocation(shop.Lat, shop.Lng)
 	if err != nil {
-		return -1, fmt.Errorf("error in getting location: %v", err)
+		return shopRes, fmt.Errorf("error in getting location: %v", err)
 	}
+	return AddShopInTx(nil, shop, location, userID, postID)
+}
+
+func AddShopInTx(tx pgx.Tx, shop *ShopReqDTO, location *utils.Location, userID int, postID int) (ShopResDTO, error) {
+
+	var shopRes ShopResDTO
 
 	countryID, err := FetchCountryIDbyName(location.Country)
 	if err != nil {
-		return -1, err
+		return shopRes, err
 	}
+
+	shopRes.Country = location.Country
 
 	query := `
 		WITH new_shop AS (
@@ -52,10 +55,9 @@ func AddShopinTx(tx *pgxpool.Tx, shop *ShopReqDTO, userID int, postID int) (any,
 			)
 			RETURNING *
 		)
-		SELECT new_shop.*, posts.title, countries.name
+		SELECT new_shop.*, posts.title
 		FROM new_shop
 		JOIN posts ON posts.id = new_shop.post_id
-		JOIN countries ON countries.id = new_shop.country_id
 	`
 
 	var row pgx.Row
@@ -101,7 +103,6 @@ func AddShopinTx(tx *pgxpool.Tx, shop *ShopReqDTO, userID int, postID int) (any,
 		&shopRes.Address,
 		&shopRes.MapLink,
 		&shopRes.PostTitle,
-		&shopRes.Country,
 	)
 	return shopRes, err
 }

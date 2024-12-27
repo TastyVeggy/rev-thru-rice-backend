@@ -2,32 +2,55 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
 	"github.com/TastyVeggy/rev-thru-rice-backend/models"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PostResDTO struct {
 	models.Post
 	Username string `json:"username"`
+	Countries []string `json:"countries"`
 }
 
 type PostReqDTO struct {
 	SubforumID int    `json:"subforum_id"`
 	Title      string `json:"title"`
 	Content    string `json:"content"`
+	Countries []string `json:"countries"`
 }
 
+// for generic posts (not shop subforums)
 func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
-	return AddPostInTx(nil, post, userID)
+	var postRes PostResDTO
+	tx, err := db.Pool.Begin(context.Background())
+	if err != nil {
+		return postRes, fmt.Errorf("unable to start post transaction: %v", err)
+	}
+	defer tx.Rollback(context.Background())
+	postRes, err = AddPostInTx(tx, post, userID)
+	
+	if err != nil {
+		return postRes, err
+	}
+
+	err = tx.Commit(context.Background())
+
+	return postRes, err
 }
 
-func AddPostInTx(tx *pgxpool.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
+
+
+func AddPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
 	var postRes PostResDTO
-	query := `
+
+	if tx == nil {
+		return postRes, errors.New("needs to be part of transaction due to multiple queries required")
+	}
+	post_query := `
 		WITH new_post AS (
 			INSERT INTO posts (subforum_id, user_id, title, content)
 			VALUES ($1, $2, $3, $4)
@@ -38,26 +61,14 @@ func AddPostInTx(tx *pgxpool.Tx, post *PostReqDTO, userID int) (PostResDTO, erro
 		JOIN users ON  new_post.user_id = users.id
 	`
 
-	var row pgx.Row
-	if tx != nil {
-		row = tx.QueryRow(
-			context.Background(),
-			query,
-			post.SubforumID,
-			userID,
-			post.Title,
-			post.Content,
-		)
-	} else {
-		row = db.Pool.QueryRow(
-			context.Background(),
-			query,
-			post.SubforumID,
-			userID,
-			post.Title,
-			post.Content,
-		)
-	}
+	row := tx.QueryRow(
+		context.Background(),
+		post_query,
+		post.SubforumID,
+		userID,
+		post.Title,
+		post.Content,
+	)
 
 	err := row.Scan(
 		&postRes.ID,
@@ -69,6 +80,36 @@ func AddPostInTx(tx *pgxpool.Tx, post *PostReqDTO, userID int) (PostResDTO, erro
 		&postRes.CreatedAt,
 		&postRes.Username,
 	)
+
+	// handling of countries
+	for _, country := range post.Countries {
+		var countryID int
+
+		// To check if country is valid
+		err := tx.QueryRow(context.Background(), "SELECT id FROM countries where name =$1", country).Scan(&countryID)
+
+		if err != nil {
+			if err.Error() == "no rows in result set"{
+				return postRes, fmt.Errorf("country not part of list")
+			} else {
+				return postRes, err
+			}
+		}
+
+		// Insertion into link table betwen post and country
+		_, err = tx.Exec(
+			context.Background(),
+			"INSERT INTO post_country (post_id, country_id) VALUES ($1, $2)",
+			postRes.ID,
+			countryID,
+		)
+
+		if err != nil {
+			return postRes, fmt.Errorf("error inserting into post_country link table")
+		}
+		postRes.Countries = append(postRes.Countries, country)
+	}
+
 	return postRes, err
 }
 
