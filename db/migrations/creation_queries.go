@@ -39,7 +39,7 @@ var createTablesQueries = [...]string{
 			comment_count INT DEFAULT 0,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (subforum_id) REFERENCES subforums(id) ON DELETE CASCADE,
-			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 		);
 	`,
 	// Shops
@@ -68,7 +68,7 @@ var createTablesQueries = [...]string{
 			content TEXT NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 		);
 	`,
 	// Ratings
