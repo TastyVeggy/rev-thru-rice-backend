@@ -15,5 +15,8 @@ import (
 
 // protected/posts
 func ProtectedShopRoutes(g *echo.Group) {
+	g.GET("/:id/ratings", rating.GetRating)
 	g.POST("/:id/ratings", rating.CreateRating)
+	g.PUT("/:id/ratings", rating.EditRating)
+	g.DELETE("/:id/ratings", rating.DeleteRating)
 }
