@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
+	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,7 +24,7 @@ func AddShop(shop *ShopReqDTO, userID int, postID int) error {
 func AddShopinTx(tx *pgxpool.Tx, shop *ShopReqDTO, userID int, postID int) error {
 	var err error
 
-	location, err := getShopLocation(shop.Lat, shop.Lng) 
+	location, err := utils.GetShopLocation(shop.Lat, shop.Lng) 
 	if err != nil {
 		return fmt.Errorf("error in getting location: %v", err)
 	}
