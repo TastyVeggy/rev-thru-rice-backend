@@ -17,11 +17,16 @@ func CreatePost(c echo.Context) error {
 
 	userID := c.Get("user").(int)
 
-	err := services.AddPost(post, userID)
+	postRes, err := services.AddPost(post, userID)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to insert post: %v", err))
 	}
-	return c.String(http.StatusOK, "Post successfully added")
+
+	res := map[string]any{
+		"message": "Post successfully added",
+		"post":    postRes,
+	}
+	return c.JSON(http.StatusOK, res)
 
 }

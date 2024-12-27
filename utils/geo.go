@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-const(
+const (
 	googleMapsAPIURL string = "https://maps.googleapis.com/maps/api/geocode/json"
 )
 
 type GeocodingResponse struct {
 	Results []struct {
-		FormattedAddress  string `json:"formatted_address"`
+		FormattedAddress string `json:"formatted_address"`
 	}
 	Status string `json:"status"`
 }
@@ -25,10 +25,9 @@ type Location struct {
 	Country string
 }
 
-
-func GetShopLocation(lat float64, lng float64) (*Location, error){
+func GetShopLocation(lat float64, lng float64) (*Location, error) {
 	location := new(Location)
-	url := fmt.Sprintf("%s?latlng=%f,%f&key=%s", googleMapsAPIURL, lat,lng, os.Getenv("GOOGLE_MAPS_API_KEY"))
+	url := fmt.Sprintf("%s?latlng=%f,%f&key=%s", googleMapsAPIURL, lat, lng, os.Getenv("GOOGLE_MAPS_API_KEY"))
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -49,10 +48,10 @@ func GetShopLocation(lat float64, lng float64) (*Location, error){
 
 	// Yes very ugly way to get country, for some reason could not quite get it directly from google maps api
 	addressParts := strings.Split(location.Address, ", ")
-	location.Country = addressParts[len(addressParts) - 1]
+	location.Country = addressParts[len(addressParts)-1]
 
 	// Super scuffed but problem is that google maps return Myanmar as Myanmar (Burma)
-	if strings.Contains(location.Country, "Myanmar"){
+	if strings.Contains(location.Country, "Myanmar") {
 		location.Country = "Myanmar"
 	}
 

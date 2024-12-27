@@ -69,5 +69,12 @@ func Signup(c echo.Context) error {
 		return c.String(http.StatusOK, user.Username+" has been successfully added but unable to generate JWT token")
 	}
 
-	return c.String(http.StatusOK, user.Username+" has been successfully added.")
+	res := map[string]any{
+		"message": "Successfully signed up " + user.Username,
+		"user": map[string]any{
+			"user_id":  userID,
+			"username": user.Username,
+		},
+	}
+	return c.JSON(http.StatusOK, res)
 }

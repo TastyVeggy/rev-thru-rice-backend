@@ -25,7 +25,7 @@ func GetPosts(c echo.Context) error {
 	if subforumIDString == "" {
 		subforumIDString = "-1"
 	}
-	if userIDString == ""{
+	if userIDString == "" {
 		userIDString = "-1"
 	}
 

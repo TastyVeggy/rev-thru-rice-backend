@@ -16,43 +16,76 @@ type CommentReqDTO struct {
 type CommentResDTO struct {
 	models.Comment
 	PostTitle string `json:"post_title"`
-	Username string `json:"username"`
+	Username  string `json:"username"`
 }
 
-func AddComment(comment *CommentReqDTO, userID int, postID int) error {
+func AddComment(comment *CommentReqDTO, userID int, postID int) (CommentResDTO, error) {
+	var commentRes CommentResDTO
 	query := `
-		INSERT INTO comments (post_id, user_id, content)
-		VALUES ($1, $2, $3)
+		WITH new_comment AS (
+			INSERT INTO comments (post_id, user_id, content)
+			VALUES ($1, $2, $3)
+			RETURNING *
+		)
+		SELECT new_comment.*, posts.title, users.username
+		FROM new_comment
+		JOIN users ON users.id = new_comment.user_id
+		JOIN posts ON posts.id = new_comment.post_id
 	`
 
-	_, err := db.Pool.Exec(
+	err := db.Pool.QueryRow(
 		context.Background(),
 		query,
 		postID,
 		userID,
 		comment.Content,
+	).Scan(
+		&commentRes.ID,
+		&commentRes.PostID,
+		&commentRes.UserID,
+		&commentRes.Content,
+		&commentRes.CreatedAt,
+		&commentRes.PostTitle,
+		&commentRes.Username,
 	)
-
-	if err != nil {
-		return err
-	}
-	return nil
+	return commentRes, err
 }
 
-func EditComment(comment *CommentReqDTO, userID int, commentID int) (int64, error) {
+func EditComment(comment *CommentReqDTO, userID int, commentID int) (CommentResDTO, error) {
+	var commentRes CommentResDTO
 	query := `
-		UPDATE comments
-		SET content=$1
-		WHERE id=$2 AND user_id=$3
+		WITH new_comment AS (
+			UPDATE comments
+			SET content=$1
+			WHERE id=$2 AND user_id=$3
+			RETURNING *
+		)
+		SELECT new_comment.*, posts.title, users.username
+		FROM new_comment
+		JOIN  
+		users ON users.id = new_comment.user_id
+		JOIN 
+		posts ON posts.id = new_comment.post_id
 	`
-	commandTag, err := db.Pool.Exec(context.Background(), query, comment.Content, commentID, userID)
-	if err != nil {
-		return 0, err
-	}
-	return commandTag.RowsAffected(), err
+	err := db.Pool.QueryRow(
+		context.Background(),
+		query,
+		comment.Content,
+		commentID,
+		userID,
+	).Scan(
+		&commentRes.ID,
+		&commentRes.PostID,
+		&commentRes.UserID,
+		&commentRes.Content,
+		&commentRes.CreatedAt,
+		&commentRes.PostTitle,
+		&commentRes.Username,
+	)
+	return commentRes, err
 }
 
-func RemoveComment(commentID int, userID int) (int64, error){
+func RemoveComment(commentID int, userID int) (int64, error) {
 	query := `
 		DELETE FROM comments
 		WHERE id=$1 AND user_id=$2
@@ -67,17 +100,17 @@ func RemoveComment(commentID int, userID int) (int64, error){
 func FetchComments(limit int, offset int, postID int, userID int) ([]CommentResDTO, error) {
 	var (
 		comments []CommentResDTO
-		comment CommentResDTO
-		rows  pgx.Rows
-		err   error
+		comment  CommentResDTO
+		rows     pgx.Rows
+		err      error
 	)
 
 	query := `
 		SELECT comments.*, posts.title, users.username
 		FROM comments
-		INNER JOIN
+		JOIN
 		posts on comments.post_id = posts.id
-		INNER JOIN
+		JOIN
 		users on comments.user_id = users.id
 	`
 	params := []interface{}{}
@@ -94,7 +127,7 @@ func FetchComments(limit int, offset int, postID int, userID int) ([]CommentResD
 		placeholderIndex++
 	}
 
-	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", placeholderIndex, placeholderIndex + 1)
+	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", placeholderIndex, placeholderIndex+1)
 	params = append(params, limit, offset)
 
 	rows, err = db.Pool.Query(context.Background(), query, params...)

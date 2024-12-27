@@ -24,21 +24,26 @@ func CreateShop(c echo.Context) error {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Bad post request: %v", err))
 	}
 
-	err = services.AddShop(shop, userID, postID)
+	shopRes, err := services.AddShop(shop, userID, postID)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "error in getting location"){
-			if strings.Contains(err.Error(), "no results found for given coordinates"){
+		if strings.Contains(err.Error(), "error in getting location") {
+			if strings.Contains(err.Error(), "no results found for given coordinates") {
 				return c.String(http.StatusBadRequest, fmt.Sprintf("lat long given invalid: %v", err))
 			} else {
 				return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to reverse geocode: %v", err))
 			}
-		} else if strings.Contains(err.Error(), "country not part of list"){
+		} else if strings.Contains(err.Error(), "country not part of list") {
 			return c.String(http.StatusBadRequest, fmt.Sprintf("Shop location not within country list: %v", err))
 		} else {
 			return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to add shop, %v", err))
 		}
 	}
 
-	return c.String(http.StatusOK, "yeah")
+	res := map[string]any{
+		"message": "Shop successfully added",
+		"shop":    shopRes,
+	}
+
+	return c.JSON(http.StatusOK, res)
 }

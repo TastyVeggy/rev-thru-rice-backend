@@ -21,7 +21,7 @@ func ProtectedPostRoutes(g *echo.Group) {
 	g.PUT("/:id", post.EditPost)
 	g.DELETE("/:id", post.DeletePost)
 	g.POST("/:id/comments", comment.CreateComment)
-	
+
 	g.POST("/:id/shops", shop.CreateShop)
 	// g.POST("/shops", post.CreateShopPost) // Creating a shop comes bundled with a post and a rating
 }

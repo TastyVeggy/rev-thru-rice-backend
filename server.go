@@ -38,7 +38,6 @@ func main() {
 	protected := e.Group("/protected")
 	protected.Use(middleware.JWT)
 
-
 	// Making/Deleting posts/comments requires auth
 	protectedPostRoutes := protected.Group("/posts")
 	routes.ProtectedPostRoutes(protectedPostRoutes)
@@ -46,6 +45,8 @@ func main() {
 	protectedCommentsRoutes := protected.Group("/comments")
 	routes.ProtectedCommentRoutes(protectedCommentsRoutes)
 
+	protectedShopRoutes := protected.Group("/shops")
+	routes.ProtectedShopRoutes(protectedShopRoutes)
 	// Profile settings
 	// protectedUserRoutes := protected.Group("/users")
 	// routes.ProtectedUserRoutes(protectedUserRoutes)
@@ -53,7 +54,6 @@ func main() {
 	// Making/Deleting shops/ratings require auth
 	// protectedShopRoutes := protected.Group("/shop")
 	// routes.ProtectedShopRoutes(protectedShopRoutes)
-
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")

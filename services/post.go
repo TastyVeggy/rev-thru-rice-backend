@@ -21,19 +21,26 @@ type PostReqDTO struct {
 	Content    string `json:"content"`
 }
 
-func AddPost(post *PostReqDTO, userID int) error {
+func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
 	return AddPostInTx(nil, post, userID)
 }
 
-
-func AddPostInTx(tx *pgxpool.Tx, post *PostReqDTO, userID int) error {
-	var err error
+func AddPostInTx(tx *pgxpool.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
+	var postRes PostResDTO
 	query := `
-		INSERT INTO posts (subforum_id, user_id, title, content)
-		VALUES ($1, $2, $3, $4)
+		WITH new_post AS (
+			INSERT INTO posts (subforum_id, user_id, title, content)
+			VALUES ($1, $2, $3, $4)
+			RETURNING *
+		)
+		SELECT new_post.*, users.username
+		FROM new_post
+		JOIN users ON  new_post.user_id = users.id
 	`
+
+	var row pgx.Row
 	if tx != nil {
-		_, err = tx.Exec(
+		row = tx.QueryRow(
 			context.Background(),
 			query,
 			post.SubforumID,
@@ -42,7 +49,7 @@ func AddPostInTx(tx *pgxpool.Tx, post *PostReqDTO, userID int) error {
 			post.Content,
 		)
 	} else {
-		_, err = db.Pool.Exec(
+		row = db.Pool.QueryRow(
 			context.Background(),
 			query,
 			post.SubforumID,
@@ -52,23 +59,52 @@ func AddPostInTx(tx *pgxpool.Tx, post *PostReqDTO, userID int) error {
 		)
 	}
 
-	if err != nil {
-		return err
-	}
-	return nil
+	err := row.Scan(
+		&postRes.ID,
+		&postRes.SubforumID,
+		&postRes.UserID,
+		&postRes.Title,
+		&postRes.Content,
+		&postRes.CommentCount,
+		&postRes.CreatedAt,
+		&postRes.Username,
+	)
+	return postRes, err
 }
 
-func EditPost(post *PostReqDTO, postID int, userID int) (int64, error) {
+func EditPost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
+	var postRes PostResDTO
 	query := `
-		UPDATE posts
-		SET subforum_id=$1, title=$2, content=$3
-		WHERE id=$4 AND user_id=$5
+		WITH new_post AS (
+			UPDATE posts
+			SET subforum_id=$1, title=$2, content=$3
+			WHERE id=$4 AND user_id=$5
+			RETURNING *
+		)
+		SELECT new_post.*, users.username
+		FROM new_post
+		JOIN users ON new_post.user_id = users.id
 	`
-	commandTag, err := db.Pool.Exec(context.Background(), query, post.SubforumID, post.Title, post.Content, postID, userID)
-	if err != nil {
-		return 0, err
-	}
-	return commandTag.RowsAffected(), err
+
+	err := db.Pool.QueryRow(
+		context.Background(),
+		query,
+		post.SubforumID,
+		post.Title,
+		post.Content,
+		postID,
+		userID,
+	).Scan(
+		&postRes.ID,
+		&postRes.SubforumID,
+		&postRes.UserID,
+		&postRes.Title,
+		&postRes.Content,
+		&postRes.CommentCount,
+		&postRes.CreatedAt,
+		&postRes.Username,
+	)
+	return postRes, err
 }
 
 func RemovePost(postID int, userID int) (int64, error) {
@@ -102,11 +138,8 @@ func FetchPostByID(postID int) (PostResDTO, error) {
 		&post.CreatedAt,
 		&post.Username,
 	)
-	if err != nil {
-		return post, err
-	}
 
-	return post, nil
+	return post, err
 }
 
 func FetchPosts(limit int, offset int, subforumID int, userID int) ([]PostResDTO, error) {
@@ -136,7 +169,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int) ([]PostResDTO
 		placeholderIndex++
 	}
 
-	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", placeholderIndex, placeholderIndex + 1)
+	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", placeholderIndex, placeholderIndex+1)
 	params = append(params, limit, offset)
 
 	rows, err = db.Pool.Query(context.Background(), query, params...)

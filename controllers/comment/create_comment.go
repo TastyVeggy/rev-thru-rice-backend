@@ -22,9 +22,14 @@ func CreateComment(c echo.Context) error {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Bad post request: %v", err))
 	}
 
-	err = services.AddComment(comment, userID, postID)
+	commentRes, err := services.AddComment(comment, userID, postID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to insert comment: %v", err))
 	}
-	return c.String(http.StatusOK, "Comment successfully added")
+
+	res := map[string]any{
+		"message": "Comment successfully added",
+		"comment": commentRes,
+	}
+	return c.JSON(http.StatusOK, res)
 }

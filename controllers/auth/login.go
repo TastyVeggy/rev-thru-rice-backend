@@ -44,5 +44,12 @@ func Login(c echo.Context) error {
 		return c.String(http.StatusOK, fmt.Sprintf("Valid login credentials but unable to generate JWT and set cookie: %v", err))
 	}
 
-	return c.String(http.StatusOK, "Successfully logged in")
+	res := map[string]any{
+		"message": "Successfully logged in " + user.Username,
+		"user": map[string]any{
+			"user_id":  userID,
+			"username": user.Username,
+		},
+	}
+	return c.JSON(http.StatusOK, res)
 }

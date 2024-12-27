@@ -9,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 func GetComments(c echo.Context) error {
 	page := c.QueryParam("page")
 	limit := c.QueryParam("limit")
@@ -26,7 +25,7 @@ func GetComments(c echo.Context) error {
 	if postIDString == "" {
 		postIDString = "-1"
 	}
-	if userIDString == ""{
+	if userIDString == "" {
 		userIDString = "-1"
 	}
 
