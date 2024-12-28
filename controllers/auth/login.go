@@ -3,7 +3,6 @@ package auth
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
@@ -17,39 +16,24 @@ func Login(c echo.Context) error {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Login bad request: %v", err))
 	}
 
-	userExists, err := services.Exists("username", user.Username)
+	userRes, err := services.LoginUser(user)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to verify if user exists: %v", err))
+		if err.Error() == "username does not exist" || err.Error() == "password is incorrect"{
+			return c.String(http.StatusUnauthorized, "Invalid username or password")
+		} else {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to verify credentials, %v", err))
+		}
 	}
 
-	storedHashedPassword, err := services.FetchPasswordbyUsername(user.Username)
-	// Do this so that when username given does not exist, it will not throw an erroneous internal server error
-	if err != nil && !strings.Contains(err.Error(), "username does not exist") {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to obtain stored password: %v", err))
-	}
-
-	isCorrectPassword := utils.ComparePasswords(storedHashedPassword, user.Password)
-
-	if !userExists || !isCorrectPassword {
-		return c.String(http.StatusUnauthorized, "Invalid username or passsword")
-	}
-
-	userID, err := services.FetchUserIDbyUsername(user.Username)
+	err = utils.GenerateJWTandSetCookie(userRes.ID, c)
 	if err != nil {
-		return c.String(http.StatusOK, fmt.Sprintf("Valid login credential but unable to obtain userid to generate JWT:  %v", err))
-	}
-
-	err = utils.GenerateJWTandSetCookie(userID, c)
-	if err != nil {
-		return c.String(http.StatusOK, fmt.Sprintf("Valid login credentials but unable to generate JWT and set cookie: %v", err))
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Login credentials are correct but unable to generate JWT token or set cookie: %v", err))
 	}
 
 	res := map[string]any{
-		"message": "Successfully logged in " + user.Username,
-		"user": map[string]any{
-			"user_id":  userID,
-			"username": user.Username,
-		},
+		"message": "Successfully logged in",
+		"user": userRes,
 	}
+
 	return c.JSON(http.StatusOK, res)
 }

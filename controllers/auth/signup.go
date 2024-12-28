@@ -2,12 +2,11 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+	"strings"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,63 +17,34 @@ import (
 // - confirm_password
 
 func Signup(c echo.Context) error {
-	var err error
-	user := new(services.SignupReqDTO)
-	if err = c.Bind(user); err != nil {
+	user := new(services.UserReqDTO)
+	if err := c.Bind(user); err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Signup bad request: %v", err))
 	}
 
-	// Backend validation for increased security
-	err = utils.Validator.Struct(user)
+
+	userRes, err := services.AddUser(user)
 	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			return c.String(http.StatusBadRequest, fmt.Sprintf("Validation failed: %s %s %s", err.StructField(), err.Tag(), err.Param()))
+		if strings.Contains(err.Error(), "error adding new user:"){
+			return c.String(http.StatusInternalServerError, err.Error())
+		} else {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+	}
+
+	err = utils.GenerateJWTandSetCookie(userRes.ID, c)
+	var res map[string]any
+	if err != nil {
+		res = map[string]any{
+			"message": fmt.Sprintf("Successfully added user but unable to generate JWT token or set cookie due to %v", err),
+			"user": userRes,
 		}
 	} else {
-		log.Println("Validation successful")
+		res = map[string]any{
+			"message": "Successfully added user, generated JWT token and set cookie",
+			"user": userRes,
+		}
 	}
 
-	if user.Password != user.ConfirmPassword {
-		return c.String(http.StatusBadRequest, "Confirm Password does not match")
-	}
-
-	userExists, err := services.Exists("username", user.Username)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to verify if username has been taken: %v", err))
-	}
-	emailExists, err := services.Exists("email", user.Email)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to verify if email has been taken: %v", err))
-	}
-
-	if userExists {
-		return c.String(http.StatusBadRequest, "Username has been taken")
-	}
-	if emailExists {
-		return c.String(http.StatusBadRequest, "Email has been taken")
-	}
-
-	err = services.AddUser(user)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error adding new user: %v", err))
-	}
-
-	userID, err := services.FetchUserIDbyUsername(user.Username)
-	if err != nil {
-		return c.String(http.StatusOK, user.Username+" has been successfully added but unable to generate JWT token")
-	}
-
-	err = utils.GenerateJWTandSetCookie(userID, c)
-	if err != nil {
-		return c.String(http.StatusOK, user.Username+" has been successfully added but unable to generate JWT token")
-	}
-
-	res := map[string]any{
-		"message": "Successfully signed up " + user.Username,
-		"user": map[string]any{
-			"user_id":  userID,
-			"username": user.Username,
-		},
-	}
 	return c.JSON(http.StatusOK, res)
 }
