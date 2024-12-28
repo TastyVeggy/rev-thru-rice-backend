@@ -28,7 +28,7 @@ func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
 	var postRes PostResDTO
 	tx, err := db.Pool.Begin(context.Background())
 	if err != nil {
-		return postRes, fmt.Errorf("unable to start post transaction: %v", err)
+		return postRes, fmt.Errorf("unable to start add post transaction: %v", err)
 	}
 	defer tx.Rollback(context.Background())
 	postRes, err = addPostInTx(tx, post, userID)
@@ -44,6 +44,11 @@ func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
 
 func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	var postRes PostResDTO
+	tx, err := db.Pool.Begin(context.Background())
+	if err != nil {
+		return postRes, fmt.Errorf("unable to start edit post transacation, %v", err)
+	}
+	defer tx.Rollback(context.Background())
 	query := `
 		WITH new_post AS (
 			UPDATE posts
@@ -56,7 +61,7 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 		JOIN users ON new_post.user_id = users.id
 	`
 
-	err := db.Pool.QueryRow(
+	err = tx.QueryRow(
 		context.Background(),
 		query,
 		post.SubforumID,
@@ -74,6 +79,52 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 		&postRes.CreatedAt,
 		&postRes.Username,
 	)
+
+	if err != nil {
+		if err == pgx.ErrNoRows{
+			return postRes, errors.New("user unauthorised to change this post or post not found")
+		}
+		return postRes, fmt.Errorf("error updating entry in posts")
+	}
+
+	// delete old country links
+	_, err = tx.Exec(
+		context.Background(),
+		"DELETE FROM post_country WHERE post_id=$1",
+		postID,
+	)
+	if err != nil {
+		return postRes, fmt.Errorf("error deleting old post_country links")
+	}
+
+	// adding new country links
+	for _, country := range post.Countries {
+		var countryID int
+
+		err := tx.QueryRow(context.Background(), "SELECT id FROM countries where name =$1", country).Scan(&countryID)
+
+		if err != nil {
+			if err.Error() == "no rows in result set" {
+				return postRes, fmt.Errorf("country not part of list")
+			} else {
+				return postRes, err
+			}
+		}
+
+		_, err = tx.Exec(
+			context.Background(),
+			"INSERT INTO post_country (post_id, country_id) VALUES ($1, $2)",
+			postRes.ID,
+			countryID,
+		)
+
+		if err != nil {
+			return postRes, fmt.Errorf("error inserting post_country links")
+		}
+		postRes.Countries = append(postRes.Countries, country)
+	}
+
+	err = tx.Commit(context.Background())
 	return postRes, err
 }
 
@@ -91,23 +142,40 @@ func RemovePost(postID int, userID int) (int64, error) {
 
 func FetchPostByID(postID int) (PostResDTO, error) {
 	var post PostResDTO
+	var country string
 
 	query := `
-		SELECT posts.*, users.username
+		SELECT posts.*, users.username, countries.name
 		FROM posts
 		JOIN users ON posts.user_id = users.id
+		JOIN post_country pc ON posts.id = pc.post_id
+		JOIN countries ON pc.country_id = countries.id
 	 	WHERE posts.id = $1
 	`
-	err := db.Pool.QueryRow(context.Background(), query, postID).Scan(
-		&post.ID,
-		&post.SubforumID,
-		&post.UserID,
-		&post.Title,
-		&post.Content,
-		&post.CommentCount,
-		&post.CreatedAt,
-		&post.Username,
-	)
+	rows, err := db.Pool.Query(context.Background(), query, postID)
+	if err != nil {
+		return post, err
+	}
+	defer rows.Close()
+
+	for rows.Next(){
+		err := rows.Scan(
+			&post.ID,
+			&post.SubforumID,
+			&post.UserID,
+			&post.Title,
+			&post.Content,
+			&post.CommentCount,
+			&post.CreatedAt,
+			&post.Username,
+			&country,
+		)
+		if err != nil {
+			return post, err
+		}
+		post.Countries = append(post.Countries, country)
+
+	}
 
 	return post, err
 }
@@ -186,16 +254,14 @@ func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
 		JOIN users ON  new_post.user_id = users.id
 	`
 
-	row := tx.QueryRow(
+	err := tx.QueryRow(
 		context.Background(),
 		post_query,
 		post.SubforumID,
 		userID,
 		post.Title,
 		post.Content,
-	)
-
-	err := row.Scan(
+	).Scan(
 		&postRes.ID,
 		&postRes.SubforumID,
 		&postRes.UserID,
@@ -205,6 +271,10 @@ func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
 		&postRes.CreatedAt,
 		&postRes.Username,
 	)
+
+	if err != nil {
+		return postRes, fmt.Errorf("error inserting into posts")
+	}
 
 	// handling of countries
 	for _, country := range post.Countries {
@@ -230,7 +300,7 @@ func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
 		)
 
 		if err != nil {
-			return postRes, fmt.Errorf("error inserting into post_country link table")
+			return postRes, fmt.Errorf("error inserting post_country links")
 		}
 		postRes.Countries = append(postRes.Countries, country)
 	}

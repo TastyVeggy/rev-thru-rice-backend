@@ -20,6 +20,9 @@ func CreatePost(c echo.Context) error {
 	postRes, err := services.AddPost(post, userID)
 
 	if err != nil {
+		if err.Error() == "country not part of list" {
+			return c.String(http.StatusBadRequest, "Added a country not part of list")
+		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to insert post: %v", err))
 	}
 

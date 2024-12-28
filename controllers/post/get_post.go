@@ -15,7 +15,11 @@ func GetPost(c echo.Context) error {
 	}
 	post, err := services.FetchPostByID(postID)
 	if err != nil {
-		return c.String(http.StatusNotFound, "Post not found")
+		if err.Error() == "no rows in result set"{
+			return c.String(http.StatusNotFound, "Post not found")
+
+		}
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, post)
 }
