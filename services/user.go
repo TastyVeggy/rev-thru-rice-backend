@@ -61,6 +61,8 @@ func AddUser(user *UserReqDTO) (UserResDTO, error) {
 		RETURNING *
 	`
 
+	var password_store string
+
 	err = db.Pool.QueryRow(
 		context.Background(),
 		query,
@@ -71,6 +73,7 @@ func AddUser(user *UserReqDTO) (UserResDTO, error) {
 		&userRes.ID,
 		&userRes.Username,
 		&userRes.Email,
+		&password_store,
 		&userRes.CreatedAt,
 		&userRes.ProfilePic,
 	)
@@ -157,17 +160,17 @@ func LoginUser(user *LoginReqDTO) (UserResDTO, error) {
 // }
 
 
-func RemoveUser(id int) (int64, error){
+func RemoveUser(id int) error {
 	query := `
 		UPDATE users
-		SET username=NULL,email=NULL,password=NULL,created_at=NULL,profilepic=''
+		SET username=NULL,email=NULL,password=NULL,created_at=NULL,profile_pic=''
 		WHERE id=$1 
 	`
 	commandTag, err := db.Pool.Exec(context.Background(), query, id)
-	if err != nil {
-		return 0, err
+	if commandTag.RowsAffected() == 0 {
+		return errors.New("no row affected")
 	}
-	return commandTag.RowsAffected(), err
+	return err
 }
 
 

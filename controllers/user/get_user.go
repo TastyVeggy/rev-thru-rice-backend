@@ -15,7 +15,10 @@ func GetUser(c echo.Context) error {
 	}
 	user, err := services.FetchUserByID(userID)
 	if err != nil {
-		return c.String(http.StatusNotFound, "User not found")
+		if err.Error() == "no rows in result set" {
+			return c.String(http.StatusNotFound, "User not found")
+		}
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, user)
 }

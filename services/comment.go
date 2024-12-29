@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
@@ -85,16 +86,16 @@ func UpdateComment(comment *CommentReqDTO, userID int, commentID int) (CommentRe
 	return commentRes, err
 }
 
-func RemoveComment(commentID int, userID int) (int64, error) {
+func RemoveComment(commentID int, userID int) error {
 	query := `
 		DELETE FROM comments
 		WHERE id=$1 AND user_id=$2
 	`
 	commandTag, err := db.Pool.Exec(context.Background(), query, commentID, userID)
-	if err != nil {
-		return 0, err
+	if commandTag.RowsAffected() == 0 {
+		return errors.New("no row affected")
 	}
-	return commandTag.RowsAffected(), err
+	return err
 }
 
 func FetchComments(limit int, offset int, postID int, userID int) ([]CommentResDTO, error) {

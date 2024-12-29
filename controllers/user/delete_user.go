@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/services"
+	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,16 +13,15 @@ import (
 func DeleteUser(c echo.Context) error {
 	userID := c.Get("user").(int)
 
-	RowsDeletedCount, err := services.RemoveUser(userID)
+	err := services.RemoveUser(userID)
 
 	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete post: %v", err))
+		if err.Error() == "no row affected"{
+			return c.String(http.StatusNotFound, "User cannot be found")
+		}
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete user: %v", err))
 	}
-
-	// 0 rows affected means, user does not exist
-	if RowsDeletedCount == 0 {
-		return c.String(http.StatusNotFound, "User does not exist")
-	}
+	utils.RemoveJWTCookie(c)
 
 	return c.JSON(http.StatusOK, "User deleted successfully")
 }

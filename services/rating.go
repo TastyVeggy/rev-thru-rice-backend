@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
 	"github.com/TastyVeggy/rev-thru-rice-backend/models"
@@ -85,17 +86,22 @@ func UpdateRating(rating *RatingReqDTO, userID int, shopID int) (RatingResDTO, e
 	return ratingRes, err
 }
 
-func RemoveRating(shopID int, userID int) (int64, error) {
+func RemoveRating(shopID int, userID int) error {
+	// Important condition: Cannot remove rating for the shop if user is the one that made the shop post (every shop is tied to one and only one post, and comes with at least one rating from the one who make the post)
 	query := `
 		DELETE FROM ratings
-		WHERE user_id=$1 AND shop_id=$2
+		USING shops, posts
+		WHERE shops.id = ratings.shop_id
+			AND posts.id = shops.post_id
+			AND posts.user_id <> $1
+			AND ratings.shop_id = $2
+			AND ratings.user_id = $1 
 	`
 	commandTag, err := db.Pool.Exec(context.Background(), query, userID, shopID)
-	if err != nil {
-		return 0, err
+	if commandTag.RowsAffected() == 0 {
+		return errors.New("no row affected")
 	}
-	return commandTag.RowsAffected(), err
-
+	return err
 }
 
 func addRatingInTx(tx pgx.Tx, rating *RatingReqDTO, shopID int, userID int) (RatingResDTO, error) {

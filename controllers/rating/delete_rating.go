@@ -16,16 +16,13 @@ func DeleteRating(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Can't convert shop id parameter to integer")
 	}
 
-	RowsDeletedCount, err := services.RemoveRating(shopID, userID)
+	err = services.RemoveRating(shopID, userID)
 
 	if err != nil {
+		if err.Error() == "no row affected"{
+			return c.String(http.StatusUnauthorized, "You cannot delete other people's rating or rating not found, or you are the one who posted the shop so you must keep a rating")
+		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete rating: %v", err))
-	}
-
-	// If no rows affected, it means that current user requesting for deletion does not tally with the user_id associated with the comment
-	// Or maybe the comment just doesn't exists
-	if RowsDeletedCount == 0 {
-		return c.String(http.StatusUnauthorized, "You cannot delete other people's rating or rating not found")
 	}
 
 	return c.JSON(http.StatusOK, "Rating deleted successfully")

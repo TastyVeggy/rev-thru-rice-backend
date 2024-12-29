@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
@@ -25,7 +24,7 @@ func EditComment(c echo.Context) error {
 
 	commentRes, err := services.UpdateComment(newComment, userID, commentID)
 	if err != nil {
-		if strings.Contains(err.Error(), "no rows in result set") {
+		if err.Error() == "no rows in result set" {
 			return c.String(http.StatusUnauthorized, "You cannot change other people's comment or comment not found")
 		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to update comment: %v", err))

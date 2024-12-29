@@ -18,7 +18,10 @@ func GetRating(c echo.Context) error {
 
 	rating, err := services.FetchRatingByShopandUser(shopID, userID)
 	if err != nil {
-		return c.String(http.StatusNotFound, "Rating not found")
+		if err.Error() == "no rows in result set"{
+			return c.String(http.StatusNotFound, "Rating not found")
+		}
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, rating)
 }
