@@ -50,7 +50,6 @@ var createTablesQueries = [...]string{
 			name VARCHAR(255) NOT NULL,
 			avg_rating DECIMAL(2,1) DEFAULT NULL,
 			country_id INT NOT NULL,
-			type VARCHAR(255) NOT NULL,
 			lat DOUBLE PRECISION NOT NULL,
 			long DOUBLE PRECISION NOT NULL,
 			address VARCHAR(255),

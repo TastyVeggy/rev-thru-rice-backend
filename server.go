@@ -30,6 +30,9 @@ func main() {
 	// viewing comments is public
 	commentRoutes := e.Group("/comments")
 	routes.CommentRoutes(commentRoutes)
+	//viewing shops is public
+	shopRoutes := e.Group("/shops")
+	routes.ShopRoutes(shopRoutes)
 
 	// countryRoutes := e.Group("/countries")
 	// routes.CountryRoutes(countryRoutes)
@@ -45,15 +48,13 @@ func main() {
 	protectedCommentsRoutes := protected.Group("/comments")
 	routes.ProtectedCommentRoutes(protectedCommentsRoutes)
 
+	// Making/Deleting shops/ratings require auth
 	protectedShopRoutes := protected.Group("/shops")
 	routes.ProtectedShopRoutes(protectedShopRoutes)
 	// Profile settings
-	// protectedUserRoutes := protected.Group("/users")
-	// routes.ProtectedUserRoutes(protectedUserRoutes)
+	protectedUserRoutes := protected.Group("/users")
+	routes.ProtectedUserRoutes(protectedUserRoutes)
 
-	// Making/Deleting shops/ratings require auth
-	// protectedShopRoutes := protected.Group("/shop")
-	// routes.ProtectedShopRoutes(protectedShopRoutes)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")

@@ -6,7 +6,6 @@ type Shop struct {
 	Name      string   `json:"name"`
 	AvgRating *float32 `json:"avg_rating"`
 	CountryID int      `json:"country_id"`
-	Type      string   `json:"type"`
 	Lat       float64  `json:"lat"`
 	Lng       float64  `json:"lng"`
 	Address   *string  `json:"address"`
