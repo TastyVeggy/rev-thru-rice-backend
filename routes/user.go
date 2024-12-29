@@ -5,10 +5,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func UserRoutes(g *echo.Group){
+func UserRoutes(g *echo.Group) {
 	g.GET("/:id", user.GetUser)
 }
-
 
 func ProtectedUserRoutes(g *echo.Group) {
 	// TODO: edit user password and info and profile pic

@@ -14,7 +14,7 @@ func GetPosts(c echo.Context) error {
 	page := c.QueryParam("page")
 	limit := c.QueryParam("limit")
 	subforumIDString := c.QueryParam("subforum_id")
-	userIDString := c.QueryParam("user_id") // posts from this user 
+	userIDString := c.QueryParam("user_id") // posts from this user
 	countryIDsString := c.QueryParam("country_ids")
 
 	if page == "" {
@@ -52,7 +52,7 @@ func GetPosts(c echo.Context) error {
 	}
 
 	countryIDs := []int{}
-	for _, IDstring := range strings.Split(countryIDsString, ","){
+	for _, IDstring := range strings.Split(countryIDsString, ",") {
 		countryID, err := strconv.Atoi(IDstring)
 		if err != nil {
 			countryIDs = []int{}

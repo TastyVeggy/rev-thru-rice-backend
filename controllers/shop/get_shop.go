@@ -15,7 +15,7 @@ func GetShop(c echo.Context) error {
 	}
 	shop, err := services.FetchShopByID(shopID)
 	if err != nil {
-		if err.Error() == "no rows in result set"{
+		if err.Error() == "no rows in result set" {
 			return c.String(http.StatusNotFound, "Shop not found")
 		}
 		return c.String(http.StatusInternalServerError, err.Error())

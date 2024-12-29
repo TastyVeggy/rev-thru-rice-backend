@@ -19,7 +19,7 @@ func DeleteRating(c echo.Context) error {
 	err = services.RemoveRating(shopID, userID)
 
 	if err != nil {
-		if err.Error() == "no row affected"{
+		if err.Error() == "no row affected" {
 			return c.String(http.StatusUnauthorized, "You cannot delete other people's rating or rating not found, or you are the one who posted the shop so you must keep a rating")
 		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete rating: %v", err))

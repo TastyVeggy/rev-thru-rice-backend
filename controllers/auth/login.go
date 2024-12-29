@@ -18,7 +18,7 @@ func Login(c echo.Context) error {
 
 	userRes, err := services.LoginUser(user)
 	if err != nil {
-		if err.Error() == "username does not exist" || err.Error() == "password is incorrect"{
+		if err.Error() == "username does not exist" || err.Error() == "password is incorrect" {
 			return c.String(http.StatusUnauthorized, "Invalid username or password")
 		} else {
 			return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to verify credentials, %v", err))
@@ -32,7 +32,7 @@ func Login(c echo.Context) error {
 
 	res := map[string]any{
 		"message": "Successfully logged in",
-		"user": userRes,
+		"user":    userRes,
 	}
 
 	return c.JSON(http.StatusOK, res)

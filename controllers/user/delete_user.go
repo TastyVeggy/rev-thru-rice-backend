@@ -16,7 +16,7 @@ func DeleteUser(c echo.Context) error {
 	err := services.RemoveUser(userID)
 
 	if err != nil {
-		if err.Error() == "no row affected"{
+		if err.Error() == "no row affected" {
 			return c.String(http.StatusNotFound, "User cannot be found")
 		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete user: %v", err))
@@ -25,4 +25,3 @@ func DeleteUser(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, "User deleted successfully")
 }
-

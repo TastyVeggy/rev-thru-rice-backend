@@ -22,10 +22,9 @@ func Signup(c echo.Context) error {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Signup bad request: %v", err))
 	}
 
-
 	userRes, err := services.AddUser(user)
 	if err != nil {
-		if strings.Contains(err.Error(), "error adding new user:"){
+		if strings.Contains(err.Error(), "error adding new user:") {
 			return c.String(http.StatusInternalServerError, err.Error())
 		} else {
 			return c.String(http.StatusBadRequest, err.Error())
@@ -37,12 +36,12 @@ func Signup(c echo.Context) error {
 	if err != nil {
 		res = map[string]any{
 			"message": fmt.Sprintf("Successfully added user but unable to generate JWT token or set cookie due to %v", err),
-			"user": userRes,
+			"user":    userRes,
 		}
 	} else {
 		res = map[string]any{
 			"message": "Successfully added user, generated JWT token and set cookie",
-			"user": userRes,
+			"user":    userRes,
 		}
 	}
 

@@ -19,12 +19,11 @@ func DeletePost(c echo.Context) error {
 	err = services.RemovePost(postID, userID)
 
 	if err != nil {
-		if err.Error() == "no row affected"{
+		if err.Error() == "no row affected" {
 			return c.String(http.StatusUnauthorized, "You cannot delete other people's post or post not found")
 		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete post: %v", err))
 	}
-
 
 	return c.JSON(http.StatusOK, "Post deleted successfully")
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func BuildFiltersforQuery(filters map[string]any) (string, []any){
+func BuildFiltersforQuery(filters map[string]any) (string, []any) {
 	conditions := []string{}
 	args := []any{}
 

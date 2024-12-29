@@ -82,7 +82,7 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	)
 
 	if err != nil {
-		if err == pgx.ErrNoRows{
+		if err == pgx.ErrNoRows {
 			return postRes, errors.New("user unauthorised to change this post or post not found")
 		}
 		return postRes, fmt.Errorf("error updating entry in posts")
@@ -191,12 +191,11 @@ Eg. The sql query built to find 2nd page posts (where each page is 10 posts) in 
 		ON pc.country_id = countries.id
 		WHERE pc.country_id IN (1,2)
 	)
-	AND posts.subforum_id=3 
+	AND posts.subforum_id=3
 	AND posts.user_id=4
 	GROUP BY posts.id, users.id
 	ORDER BY posts.created_at DESC
 	LIMIT 10 OFFSET 10
-
 */
 func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []int) ([]PostResDTO, error) {
 	var err error
@@ -217,7 +216,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 	params := []any{}
 	if len(countryIDs) > 0 {
 		placeholders := []string{}
-		for i := range countryIDs{
+		for i := range countryIDs {
 			placeholders = append(placeholders, fmt.Sprintf("$%d", placeholdersIndex))
 			params = append(params, countryIDs[i])
 			placeholdersIndex++
@@ -239,7 +238,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.subforum_id", placeholdersIndex))
 		params = append(params, subforumID)
 		placeholdersIndex++
-	} 
+	}
 
 	if userID > 0 {
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.user_id", placeholdersIndex))
@@ -255,8 +254,8 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 			GROUP BY posts.id, users.id
 			ORDER BY posts.created_at DESC
 			LIMIT $%d OFFSET $%d
-		` , 
-		placeholdersIndex, 
+		`,
+		placeholdersIndex,
 		placeholdersIndex+1,
 	)
 
@@ -271,7 +270,6 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 	}
 
 	defer rows.Close()
-
 
 	for rows.Next() {
 		var post PostResDTO

@@ -34,7 +34,6 @@ type LoginReqDTO struct {
 	Password string `json:"password"`
 }
 
-
 func AddUser(user *UserReqDTO) (UserResDTO, error) {
 	var userRes UserResDTO
 
@@ -78,9 +77,9 @@ func AddUser(user *UserReqDTO) (UserResDTO, error) {
 		&userRes.ProfilePic,
 	)
 	if err != nil {
-		if err.Error() == `duplicate key value violates unique constraint "users_username_key`{
+		if err.Error() == `duplicate key value violates unique constraint "users_username_key` {
 			err = errors.New("username has been taken")
-		} else if err.Error()== `duplicate key value violates unique constraint "users_email_key`{
+		} else if err.Error() == `duplicate key value violates unique constraint "users_email_key` {
 			err = errors.New("email has been taken")
 		} else {
 			err = fmt.Errorf("error adding new user: %v", err)
@@ -147,9 +146,8 @@ func LoginUser(user *LoginReqDTO) (UserResDTO, error) {
 // 			userID,
 // 		)
 // 	} else {
-// 		query := 
+// 		query :=
 // 	}
-
 
 // 	query := `
 // 		WITH new_user AS (
@@ -158,7 +156,6 @@ func LoginUser(user *LoginReqDTO) (UserResDTO, error) {
 // 	`
 // 	return userRes, nil
 // }
-
 
 func RemoveUser(id int) error {
 	query := `
@@ -173,8 +170,7 @@ func RemoveUser(id int) error {
 	return err
 }
 
-
-func FetchUserByID(id int) (UserResDTO, error){
+func FetchUserByID(id int) (UserResDTO, error) {
 	var user UserResDTO
 
 	query := "SELECT username, email FROM users WHERE id = $1"

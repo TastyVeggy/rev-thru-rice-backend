@@ -20,7 +20,7 @@ func DeleteShop(c echo.Context) error {
 	err = services.RemoveShop(shopID, userID)
 
 	if err != nil {
-		if err.Error() == "no row affected"{
+		if err.Error() == "no row affected" {
 			return c.String(http.StatusUnauthorized, "You cannot delete other people's shop or shop not found")
 		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to delete shop: %v", err))

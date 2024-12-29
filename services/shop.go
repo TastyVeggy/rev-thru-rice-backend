@@ -33,7 +33,7 @@ func AddShop(shop *ShopReqDTO, userID int, postID int) (ShopResDTO, error) {
 	return addShopInTx(nil, shop, location, userID, postID)
 }
 
-func UpdateShop(shop *ShopReqDTO, userID int, shopID int) (ShopResDTO, error){
+func UpdateShop(shop *ShopReqDTO, userID int, shopID int) (ShopResDTO, error) {
 	var shopRes ShopResDTO
 
 	location, err := utils.GetShopLocation(shop.Lat, shop.Lng)
@@ -94,7 +94,7 @@ func UpdateShop(shop *ShopReqDTO, userID int, shopID int) (ShopResDTO, error){
 		}
 		return shopRes, fmt.Errorf("error updating entry in shops:  %v", err)
 	}
-	
+
 	country_query := `
 		UPDATE post_country
 		SET country_id=$1
@@ -114,7 +114,7 @@ func UpdateShop(shop *ShopReqDTO, userID int, shopID int) (ShopResDTO, error){
 	if err != nil {
 		return shopRes, fmt.Errorf("error commiting edit shop transaction: %v", err)
 	}
-	return shopRes, err 
+	return shopRes, err
 }
 
 func RemoveShop(shopID int, userID int) error {
@@ -130,9 +130,9 @@ func RemoveShop(shopID int, userID int) error {
 	return err
 }
 
-func FetchShopByID(shopID int) (ShopResDTO, error){
+func FetchShopByID(shopID int) (ShopResDTO, error) {
 	var shop ShopResDTO
-	
+
 	query := `
 		SELECT shops.*, posts.title, countries.name
 		FROM shops

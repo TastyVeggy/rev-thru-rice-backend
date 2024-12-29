@@ -55,7 +55,6 @@ func main() {
 	protectedUserRoutes := protected.Group("/users")
 	routes.ProtectedUserRoutes(protectedUserRoutes)
 
-
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
