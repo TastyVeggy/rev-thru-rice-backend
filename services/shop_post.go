@@ -22,7 +22,7 @@ type ShopPostResDTO struct {
 
 // Making a shop post involves an atomic transaction of
 // adding a post, adding a shop and adding a rating
-func AddShopPost(shopPost *ShopPostReqDTO, userID int) (ShopPostResDTO, error) {
+func AddShopPost(shopPost *ShopPostReqDTO, userID int, subforumID int) (ShopPostResDTO, error) {
 	var shopPostRes ShopPostResDTO
 
 	if len(shopPost.Post.Countries) > 0 {
@@ -44,7 +44,7 @@ func AddShopPost(shopPost *ShopPostReqDTO, userID int) (ShopPostResDTO, error) {
 	}
 	defer tx.Rollback(context.Background())
 
-	shopPostRes.Post, err = addPostInTx(tx, &shopPost.Post, userID)
+	shopPostRes.Post, err = addPostInTx(tx, &shopPost.Post, userID, subforumID)
 	if err != nil {
 		return shopPostRes, fmt.Errorf("error adding post: %v", err)
 	}

@@ -18,21 +18,20 @@ type PostResDTO struct {
 }
 
 type PostReqDTO struct {
-	SubforumID int      `json:"subforum_id"`
 	Title      string   `json:"title"`
 	Content    string   `json:"content"`
 	Countries  []string `json:"countries"`
 }
 
 // for generic posts (not shop subforums)
-func AddPost(post *PostReqDTO, userID int) (PostResDTO, error) {
+func AddPost(post *PostReqDTO, userID int, subforumID int) (PostResDTO, error) {
 	var postRes PostResDTO
 	tx, err := db.Pool.Begin(context.Background())
 	if err != nil {
 		return postRes, fmt.Errorf("unable to start add post transaction: %v", err)
 	}
 	defer tx.Rollback(context.Background())
-	postRes, err = addPostInTx(tx, post, userID)
+	postRes, err = addPostInTx(tx, post, userID, subforumID)
 
 	if err != nil {
 		return postRes, err
@@ -53,8 +52,8 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	query := `
 		WITH new_post AS (
 			UPDATE posts
-			SET subforum_id=$1, title=$2, content=$3
-			WHERE id=$4 AND user_id=$5
+			SET title=$1, content=$2
+			WHERE id=$3 AND user_id=$4
 			RETURNING *
 		)
 		SELECT new_post.*, users.username
@@ -65,7 +64,6 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	err = tx.QueryRow(
 		context.Background(),
 		query,
-		post.SubforumID,
 		post.Title,
 		post.Content,
 		postID,
@@ -82,7 +80,7 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	)
 
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if err == pgx.ErrNoRows{
 			return postRes, errors.New("user unauthorised to change this post or post not found")
 		}
 		return postRes, fmt.Errorf("error updating entry in posts")
@@ -191,11 +189,12 @@ Eg. The sql query built to find 2nd page posts (where each page is 10 posts) in 
 		ON pc.country_id = countries.id
 		WHERE pc.country_id IN (1,2)
 	)
-	AND posts.subforum_id=3
+	AND posts.subforum_id=3 
 	AND posts.user_id=4
 	GROUP BY posts.id, users.id
 	ORDER BY posts.created_at DESC
 	LIMIT 10 OFFSET 10
+
 */
 func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []int) ([]PostResDTO, error) {
 	var err error
@@ -216,7 +215,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 	params := []any{}
 	if len(countryIDs) > 0 {
 		placeholders := []string{}
-		for i := range countryIDs {
+		for i := range countryIDs{
 			placeholders = append(placeholders, fmt.Sprintf("$%d", placeholdersIndex))
 			params = append(params, countryIDs[i])
 			placeholdersIndex++
@@ -238,7 +237,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.subforum_id", placeholdersIndex))
 		params = append(params, subforumID)
 		placeholdersIndex++
-	}
+	} 
 
 	if userID > 0 {
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.user_id", placeholdersIndex))
@@ -254,8 +253,8 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 			GROUP BY posts.id, users.id
 			ORDER BY posts.created_at DESC
 			LIMIT $%d OFFSET $%d
-		`,
-		placeholdersIndex,
+		` , 
+		placeholdersIndex, 
 		placeholdersIndex+1,
 	)
 
@@ -293,7 +292,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 	return posts, nil
 }
 
-func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
+func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int, subforumID int) (PostResDTO, error) {
 	var postRes PostResDTO
 
 	if tx == nil {
@@ -313,7 +312,7 @@ func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
 	err := tx.QueryRow(
 		context.Background(),
 		post_query,
-		post.SubforumID,
+		subforumID,
 		userID,
 		post.Title,
 		post.Content,

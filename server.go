@@ -24,6 +24,12 @@ func main() {
 	// login/logout/signup
 	authRoutes := e.Group("/auth")
 	routes.AuthRoutes(authRoutes)
+	// viewing subforum is public 
+	subforumRoutes := e.Group("/subforums")
+	routes.SubforumRoutes(subforumRoutes)
+	// viewing countries is public
+	countryRoutes := e.Group("/countries")
+	routes.CountryRoutes(countryRoutes)
 	// viewing posts is public
 	postRoutes := e.Group("/posts")
 	routes.PostRoutes(postRoutes)
@@ -34,21 +40,20 @@ func main() {
 	shopRoutes := e.Group("/shops")
 	routes.ShopRoutes(shopRoutes)
 
-	// countryRoutes := e.Group("/countries")
-	// routes.CountryRoutes(countryRoutes)
 
 	// Protected Routes
 	protected := e.Group("/protected")
 	protected.Use(middleware.JWT)
-
-	// Making/Deleting posts/comments requires auth
+	// Creation of posts in a subforum requires auth
+	protectedSubforumRoutes := protected.Group("/subforums")
+	routes.ProtectedSubforumRoutes(protectedSubforumRoutes)
+	// Editing/ Deleting posts/ Making comments/ Making a shop post requires auth
 	protectedPostRoutes := protected.Group("/posts")
 	routes.ProtectedPostRoutes(protectedPostRoutes)
-
+	//Editing/Deleting comments requires auth
 	protectedCommentsRoutes := protected.Group("/comments")
 	routes.ProtectedCommentRoutes(protectedCommentsRoutes)
-
-	// Making/Deleting shops/ratings require auth
+	// Creating rating/ Editing shops/rating Deleting shops/ratings require auth
 	protectedShopRoutes := protected.Group("/shops")
 	routes.ProtectedShopRoutes(protectedShopRoutes)
 	// Profile settings

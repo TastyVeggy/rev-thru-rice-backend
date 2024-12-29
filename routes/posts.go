@@ -10,18 +10,14 @@ import (
 func PostRoutes(g *echo.Group) {
 	g.GET("", post.GetPosts)
 	g.GET("/:id", post.GetPost)
-	// g.GET("/:id/comments", comment.GetPostComments)
-
 }
 
 // protected/posts
 func ProtectedPostRoutes(g *echo.Group) {
-	g.POST("", post.CreatePost)
 	g.PUT("/:id", post.EditPost)
 	g.DELETE("/:id", post.DeletePost)
 	g.POST("/:id/comments", comment.CreateComment)
 
 	// user cannot create shop individually
 	// g.POST("/:id/shops", shop.CreateShop)
-	g.POST("/shop_posts", post.CreateShopPost) // Creating a shop comes bundled with a post and a rating
 }

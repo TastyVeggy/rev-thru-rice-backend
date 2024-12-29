@@ -12,7 +12,7 @@ type Subforum struct {
 	Description string `json:"description"`
 }
 
-func FetchSubforums() ([]Subforum, error) {
+func FetchAllSubforums() ([]Subforum, error) {
 	var subforums []Subforum
 
 	query := "SELECT * FROM subforums"
@@ -33,18 +33,3 @@ func FetchSubforums() ([]Subforum, error) {
 	}
 	return subforums, nil
 }
-
-// func GetSubForumID(forumName string) (int, error) {
-// 	var result int
-
-// 	query := "SELECT id FROM subforums WHERE name = $1"
-// 	err := db.Pool.QueryRow(context.Background(), query, forumName).Scan(&result)
-
-// 	if err != nil {
-// 		if err == pgx.ErrNoRows {
-// 			return result, errors.New("subforum does not exist")
-// 		}
-// 		return result, err
-// 	}
-// 	return result, nil
-// }
