@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/services"
 	"github.com/labstack/echo/v4"
@@ -13,7 +14,8 @@ func GetPosts(c echo.Context) error {
 	page := c.QueryParam("page")
 	limit := c.QueryParam("limit")
 	subforumIDString := c.QueryParam("subforum_id")
-	userIDString := c.QueryParam("user_id") // posts from this user
+	userIDString := c.QueryParam("user_id") // posts from this user 
+	countryIDsString := c.QueryParam("country_ids")
 
 	if page == "" {
 		page = "1"
@@ -49,9 +51,18 @@ func GetPosts(c echo.Context) error {
 		userID = -1
 	}
 
+	countryIDs := []int{}
+	for _, IDstring := range strings.Split(countryIDsString, ","){
+		countryID, err := strconv.Atoi(IDstring)
+		if err != nil {
+			countryIDs = []int{}
+			break
+		}
+		countryIDs = append(countryIDs, countryID)
+	}
 	offset := (pageNum - 1) * limitNum
 
-	posts, err := services.FetchPosts(limitNum, offset, subforumID, userID)
+	posts, err := services.FetchPosts(limitNum, offset, subforumID, userID, countryIDs)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch posts: %v", err))
 	}

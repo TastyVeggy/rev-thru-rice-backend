@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
 	"github.com/TastyVeggy/rev-thru-rice-backend/models"
@@ -128,89 +129,142 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	return postRes, err
 }
 
-func RemovePost(postID int, userID int) (int64, error) {
+func RemovePost(postID int, userID int) error {
 	query := `
 		DELETE FROM posts
 		WHERE id=$1 AND user_id=$2
 	`
 	commandTag, err := db.Pool.Exec(context.Background(), query, postID, userID)
-	if err != nil {
-		return 0, err
+	if commandTag.RowsAffected() == 0 {
+		return errors.New("no row affected")
 	}
-	return commandTag.RowsAffected(), err
+	return err
 }
 
 func FetchPostByID(postID int) (PostResDTO, error) {
 	var post PostResDTO
-	var country string
 
 	query := `
-		SELECT posts.*, users.username, countries.name
+		SELECT 
+			posts.*, 
+			users.username, 
+			array_agg(countries.name) as country_names
 		FROM posts
 		JOIN users ON posts.user_id = users.id
 		JOIN post_country pc ON posts.id = pc.post_id
 		JOIN countries ON pc.country_id = countries.id
 	 	WHERE posts.id = $1
+		GROUP BY posts.id, users.id
 	`
-	rows, err := db.Pool.Query(context.Background(), query, postID)
-	if err != nil {
-		return post, err
-	}
-	defer rows.Close()
-
-	for rows.Next(){
-		err := rows.Scan(
-			&post.ID,
-			&post.SubforumID,
-			&post.UserID,
-			&post.Title,
-			&post.Content,
-			&post.CommentCount,
-			&post.CreatedAt,
-			&post.Username,
-			&country,
-		)
-		if err != nil {
-			return post, err
-		}
-		post.Countries = append(post.Countries, country)
-
-	}
+	err := db.Pool.QueryRow(context.Background(), query, postID).Scan(
+		&post.ID,
+		&post.SubforumID,
+		&post.UserID,
+		&post.Title,
+		&post.Content,
+		&post.CommentCount,
+		&post.CreatedAt,
+		&post.Username,
+		&post.Countries,
+	)
 
 	return post, err
 }
 
-func FetchPosts(limit int, offset int, subforumID int, userID int) ([]PostResDTO, error) {
-	var (
-		posts []PostResDTO
-		post  PostResDTO
-		rows  pgx.Rows
-		err   error
+/*
+Fetch all posts given params and page number and limit
+in the case of countries param, as long as the posts is associated with a country in the countries, it will return the post alongside the list of countries the post is associated with
+
+Eg. The sql query built to find 2nd page posts (where each page is 10 posts) in subforum 3 by user with id 4 that is associated with country Brunei and Cambodia (their country ids are 1 and 2):
+
+	SELECT posts.*,
+			users.username,
+			array_agg(countries.name) AS country_names
+	FROM posts
+	JOIN users ON posts.user_id=users.id
+	JOIN post_country pc ON posts.id = pc.post_id
+	JOIN countries ON pc.country_id = countries.id
+	WHERE posts.id IN (
+		SELECT DISTINCT pc.post_id
+		FROM post_country pc
+		JOIN countries
+		ON pc.country_id = countries.id
+		WHERE pc.country_id IN (1,2)
 	)
+	AND posts.subforum_id=3 
+	AND posts.user_id=4
+	GROUP BY posts.id, users.id
+	ORDER BY posts.created_at DESC
+	LIMIT 10 OFFSET 10
+
+*/
+func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []int) ([]PostResDTO, error) {
+	var err error
+	var posts []PostResDTO
 
 	query := `
-		SELECT posts.*, users.username
+		SELECT posts.*, 
+			users.username, 
+			array_agg(countries.name) AS country_names
 		FROM posts 
 		JOIN users ON posts.user_id=users.id
+		JOIN post_country pc ON posts.id = pc.post_id
+		JOIN countries ON pc.country_id = countries.id
 	`
-	params := []interface{}{}
-	placeholderIndex := 1
 
-	if subforumID != -1 {
-		query += fmt.Sprintf(" AND posts.subforum_id = $%d", placeholderIndex)
+	conditions := []string{}
+	placeholdersIndex := 1
+	params := []any{}
+	if len(countryIDs) > 0 {
+		placeholders := []string{}
+		for i := range countryIDs{
+			placeholders = append(placeholders, fmt.Sprintf("$%d", placeholdersIndex))
+			params = append(params, countryIDs[i])
+			placeholdersIndex++
+		}
+		placeholderString := strings.Join(placeholders, ",")
+		condition := fmt.Sprintf(`
+			posts.id IN (
+				SELECT DISTINCT pc.post_id
+				FROM post_country pc
+				JOIN countries 
+				ON pc.country_id = countries.id
+				WHERE pc.country_id IN (%s)
+			)
+		`, placeholderString)
+		conditions = append(conditions, condition)
+	}
+
+	if subforumID > 0 {
+		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.subforum_id", placeholdersIndex))
 		params = append(params, subforumID)
-		placeholderIndex++
-	}
-	if userID != -1 {
-		query += fmt.Sprintf(" AND posts.user_id=$%d", placeholderIndex)
+		placeholdersIndex++
+	} 
+
+	if userID > 0 {
+		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.user_id", placeholdersIndex))
 		params = append(params, userID)
-		placeholderIndex++
+		placeholdersIndex++
 	}
 
-	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", placeholderIndex, placeholderIndex+1)
-	params = append(params, limit, offset)
+	if len(conditions) > 0 {
+		query += fmt.Sprintf("WHERE %s", strings.Join(conditions, " AND "))
+	}
 
-	rows, err = db.Pool.Query(context.Background(), query, params...)
+	query += fmt.Sprintf(`
+			GROUP BY posts.id, users.id
+			ORDER BY posts.created_at DESC
+			LIMIT $%d OFFSET $%d
+		` , 
+		placeholdersIndex, 
+		placeholdersIndex+1,
+	)
+
+	params = append(params, limit, offset)
+	fmt.Println(query)
+	fmt.Println(params)
+
+	rows, err := db.Pool.Query(context.Background(), query, params...)
 
 	if err != nil {
 		return nil, err
@@ -218,7 +272,9 @@ func FetchPosts(limit int, offset int, subforumID int, userID int) ([]PostResDTO
 
 	defer rows.Close()
 
+
 	for rows.Next() {
+		var post PostResDTO
 		err := rows.Scan(
 			&post.ID,
 			&post.SubforumID,
@@ -228,12 +284,14 @@ func FetchPosts(limit int, offset int, subforumID int, userID int) ([]PostResDTO
 			&post.CommentCount,
 			&post.CreatedAt,
 			&post.Username,
+			&post.Countries,
 		)
 		if err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
 	}
+
 	return posts, nil
 }
 
@@ -273,7 +331,7 @@ func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int) (PostResDTO, error) {
 	)
 
 	if err != nil {
-		return postRes, fmt.Errorf("error inserting into posts")
+		return postRes, fmt.Errorf("error inserting into posts: %v", err.Error())
 	}
 
 	// handling of countries
