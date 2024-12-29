@@ -20,6 +20,8 @@ func main() {
 
 	e := echo.New()
 
+	e.Use(middleware.CORS(os.Getenv("FRONTEND_URLS")))
+
 	// Public Routes
 	// login/logout/signup
 	authRoutes := e.Group("/auth")
