@@ -15,7 +15,7 @@ type Subforum struct {
 func FetchAllSubforums() ([]Subforum, error) {
 	var subforums []Subforum
 
-	query := "SELECT * FROM subforums"
+	query := "SELECT * FROM subforums ORDER BY id"
 
 	rows, err := db.Pool.Query(context.Background(), query)
 	if err != nil {

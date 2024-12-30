@@ -15,7 +15,7 @@ type Country struct {
 func FetchAllCountries() ([]Country, error) {
 	var countries []Country
 
-	query := "SELECT * FROM countries"
+	query := "SELECT * FROM countries ORDER BY name"
 
 	rows, err := db.Pool.Query(context.Background(), query)
 	if err != nil {
