@@ -1,0 +1,17 @@
+version: '1'
+
+services:
+  backend:
+    build: .
+    env_file:
+      - .env
+    post:
+      - '${PORT}:${PORT}'
+    environment:
+      - PORT=${PORT}
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
