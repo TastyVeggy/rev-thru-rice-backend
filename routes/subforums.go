@@ -15,5 +15,5 @@ func SubforumRoutes(g *echo.Group) {
 // protected/subforums
 func ProtectedSubforumRoutes(g *echo.Group) {
 	g.POST("/:id/posts", post.CreatePost)
-	g.POST("/:id/shop_posts", post.CreateShopPost) // Creating a shop comes bundled with a post and a rating
+	g.POST("/:id/shop_review", post.CreateShopReview) // Creating a review comes bundled with a post, shop and a rating
 }

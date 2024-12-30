@@ -9,19 +9,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CreateShopPost(c echo.Context) error {
+func CreateShopReview(c echo.Context) error {
 	subforumID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Can't convert subforum id parameter to integer")
 	}
-	shopPost := new(services.ShopPostReqDTO)
-	if err := c.Bind(shopPost); err != nil {
+	shopReview := new(services.ShopReviewReqDTO)
+	if err := c.Bind(shopReview); err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("Bad post request: %v", err))
 	}
 
 	userID := c.Get("user").(int)
 
-	shopPostRes, err := services.AddShopPost(shopPost, userID, subforumID)
+	shopReviewRes, err := services.AddShopReview(shopReview, userID, subforumID)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to create shop post: %v", err))
@@ -29,7 +29,7 @@ func CreateShopPost(c echo.Context) error {
 
 	res := map[string]any{
 		"message":   "Shop post successfully added",
-		"shop_post": shopPostRes,
+		"shop_post": shopReviewRes,
 	}
 	return c.JSON(http.StatusOK, res)
 
