@@ -15,6 +15,7 @@ func CORS(originsString string) echo.MiddlewareFunc {
 		},
 		AllowHeaders: []string{
 			"Authorization",
+			"Content-Type",
 		},
 		AllowCredentials: true,
 	})
