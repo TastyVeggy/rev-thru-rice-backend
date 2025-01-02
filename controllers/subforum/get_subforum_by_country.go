@@ -1,33 +1,31 @@
 package subforum
 
-// import (
-// 	"fmt"
-// 	"net/http"
-// 	"strconv"
+import (
+	"fmt"
+	"net/http"
+	"strconv"
 
-// 	"github.com/TastyVeggy/rev-thru-rice-backend/services"
-// 	"github.com/labstack/echo/v4"
-// )
+	"github.com/TastyVeggy/rev-thru-rice-backend/services"
+	"github.com/labstack/echo/v4"
+)
 
-// func GetSubforums(c echo.Context) error {
-// 	var countryID *int
-// 	var err error
+func GetSubforumsWithPostCount(c echo.Context) error {
+	var countryID *int
 
-// 	countryIDString := c.Param("id")
+	countryIDString := c.QueryParam("country_id")
+	if countryIDString == ""{
+		countryID = nil
+	} else {
+		countryIDint, err := strconv.Atoi(countryIDString)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Can't convert country id parameter to integer")
+		}
+		countryID = &countryIDint
+	}
 
-// 	if countryIDString != ""{
-// 		countryIDint, err := strconv.Atoi(countryIDString)
-// 		if err != nil {
-// 			return c.String(http.StatusInternalServerError, "Can't convert country id parameter to integer")
-// 		}
-// 		countryID = &countryIDint
-// 	} else {
-// 		countryID = nil // no country
-// 	}
-
-// 	subforums, err := services.FetchAllSubforums(countryID)
-// 	if err != nil {
-// 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch subforums: %v", err))
-// 	}
-// 	return c.JSON(http.StatusOK, subforums)
-// }
+	subforums, err := services.FetchAllSubforumsWithPostCount(countryID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch subforums with post count: %v", err))
+	}
+	return c.JSON(http.StatusOK, subforums)
+}

@@ -268,8 +268,6 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 	)
 
 	params = append(params, limit, offset)
-	fmt.Println(query)
-	fmt.Println(params)
 
 	rows, err := db.Pool.Query(context.Background(), query, params...)
 

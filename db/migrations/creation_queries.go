@@ -25,9 +25,9 @@ var createTablesQueries = [...]string{
 		CREATE TABLE IF NOT EXISTS subforums (
 			id SERIAL PRIMARY KEY,
 			name VARCHAR(255) NOT NULL,
-			description TEXT,
-			category VARCHAR(255) --review or generic--
-			image VARCHAR(255)
+			description TEXT NOT NULL,
+			category VARCHAR(255) NOT NULL, --review or generic--
+			image VARCHAR(255) NOT NULL
 		);
 	`,
 	// Posts
@@ -53,7 +53,7 @@ var createTablesQueries = [...]string{
 			avg_rating DECIMAL(2,1) DEFAULT NULL,
 			country_id INT NOT NULL,
 			lat DOUBLE PRECISION NOT NULL,
-			long DOUBLE PRECISION NOT NULL,
+			lng DOUBLE PRECISION NOT NULL,
 			address VARCHAR(255),
 			map_link VARCHAR(255) NOT NULL,
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,

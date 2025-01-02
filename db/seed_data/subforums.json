@@ -2,36 +2,36 @@
   {
     "id": 1,
     "name": "Rental Shop Reviews",
-    "description": "Find bike rental shops",
+    "description": "Find the best motorbike rental shop for your next adventure",
     "category": "Review",
-    "image": ""
+    "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/rental_shop.png"
   },
   {
     "id": 2,
     "name": "Repair Shop Reviews",
-    "description": "Find motorbike repair shops",
+    "description": "Hopefully you haven't crashed, but regular servicing is still a must for long trips!",
     "category": "Review",
-    "image": ""
+    "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/repair_shop.png"
   },
   {
     "id": 3,
-    "name": "Buy/Sell Bikes",
-    "description": "Marketplace for travellers to buy and sell bikes",
+    "name": "Buy/Sell Marketplace",
+    "description": "Marketplace for travellers to buy and sell their motorbikes and gears",
     "category": "Generic",
-    "image": ""
+    "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/buy-sell-marketplace.jpg"
   },
   {
     "id": 4,
     "name": "Tips & Tricks",
-    "description": "Share travel tips and tricks",
+    "description": "First time embarking on motorbike trips or going to Southeast Asia, learn from those who have went before you",
     "category": "Generic",
-    "image": ""
+    "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/tips_and_tricks.jpg"
   },
   {
     "id": 5,
     "name": "Travellers' Tale",
     "description": "Share your crazy experiences",
     "category": "Generic",
-    "image": ""
+    "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/travellers_tale.jpg"
   }
 ]

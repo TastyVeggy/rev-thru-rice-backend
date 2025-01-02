@@ -10,6 +10,7 @@ import (
 // subforums
 func SubforumRoutes(g *echo.Group) {
 	g.GET("", subforum.GetSubforums)
+	g.GET("_with_post_count", subforum.GetSubforumsWithPostCount)
 }
 
 // protected/subforums

@@ -67,12 +67,12 @@ func GetPosts(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch posts: %v", err))
 	}
 
-	res := map[string]any{
-		"page":  pageNum,
-		"limit": limitNum,
-		"posts": posts,
-	}
+	// res := map[string]any{
+	// 	"page":  pageNum,
+	// 	"limit": limitNum,
+	// 	"posts": posts,
+	// }
 
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, posts)
 
 }
