@@ -25,7 +25,9 @@ var createTablesQueries = [...]string{
 		CREATE TABLE IF NOT EXISTS subforums (
 			id SERIAL PRIMARY KEY,
 			name VARCHAR(255) NOT NULL,
-			description TEXT
+			description TEXT,
+			category VARCHAR(255) --review or generic--
+			image VARCHAR(255)
 		);
 	`,
 	// Posts

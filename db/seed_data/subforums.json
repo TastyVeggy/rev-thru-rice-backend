@@ -1,23 +1,37 @@
 [
-  { "id": 1, "name": "Rental Shops", "description": "Find bike rental shops" },
+  {
+    "id": 1,
+    "name": "Rental Shop Reviews",
+    "description": "Find bike rental shops",
+    "category": "Review",
+    "image": ""
+  },
   {
     "id": 2,
-    "name": "Repair Shops",
-    "description": "Find motorbike repair shops"
+    "name": "Repair Shop Reviews",
+    "description": "Find motorbike repair shops",
+    "category": "Review",
+    "image": ""
   },
   {
     "id": 3,
     "name": "Buy/Sell Bikes",
-    "description": "Marketplace for travellers to buy and sell bikes"
+    "description": "Marketplace for travellers to buy and sell bikes",
+    "category": "Generic",
+    "image": ""
   },
   {
     "id": 4,
     "name": "Tips & Tricks",
-    "description": "Share travel tips and tricks"
+    "description": "Share travel tips and tricks",
+    "category": "Generic",
+    "image": ""
   },
   {
     "id": 5,
-    "name": "Traveller Stories",
-    "description": "Share your crazy experiences"
+    "name": "Travellers' Tale",
+    "description": "Share your crazy experiences",
+    "category": "Generic",
+    "image": ""
   }
 ]

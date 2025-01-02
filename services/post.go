@@ -26,6 +26,15 @@ type PostReqDTO struct {
 // for generic posts (not shop subforums)
 func AddPost(post *PostReqDTO, userID int, subforumID int) (PostResDTO, error) {
 	var postRes PostResDTO
+
+	subforumCategory, err := models.FetchSubforumCategorybyID(subforumID)
+	if err != nil {
+		return postRes, fmt.Errorf("unable to determine if subforum is generic, %v", err)
+	}
+	if subforumCategory == "Review"{
+		return postRes, errors.New("cannot add generic post in shop review subforums")
+	}
+
 	tx, err := db.Pool.Begin(context.Background())
 	if err != nil {
 		return postRes, fmt.Errorf("unable to start add post transaction: %v", err)

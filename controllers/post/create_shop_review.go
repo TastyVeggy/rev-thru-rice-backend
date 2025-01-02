@@ -24,6 +24,9 @@ func CreateShopReview(c echo.Context) error {
 	shopReviewRes, err := services.AddShopReview(shopReview, userID, subforumID)
 
 	if err != nil {
+		if err.Error() == "cannot add shop review to non shop review subforums" || err.Error() == "should not have any countries in shop post request, country is determined via lat long"{
+			return c.String(http.StatusBadRequest, err.Error())
+		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to create shop post: %v", err))
 	}
 

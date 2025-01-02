@@ -10,5 +10,6 @@ import (
 // countries
 func CountryRoutes(g *echo.Group) {
 	g.GET("", country.GetCountries)
-	g.GET("/:id/subforums", subforum.GetSubforums)
+	g.GET(":id/subforum_post_counts", subforum.GetPostCounts) // id < 1 if looking for the count of posts within each subforum without restriction towards country association of posts
+	// it returns only the post_counts for subforums with more than one post
 }

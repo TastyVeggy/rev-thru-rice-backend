@@ -2,9 +2,11 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
+	"github.com/TastyVeggy/rev-thru-rice-backend/models"
 	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
 )
 
@@ -25,8 +27,16 @@ type ShopReviewResDTO struct {
 func AddShopReview(shopReview *ShopReviewReqDTO, userID int, subforumID int) (ShopReviewResDTO, error) {
 	var shopReviewRes ShopReviewResDTO
 
+	subforumCategory, err := models.FetchSubforumCategorybyID(subforumID)
+	if err != nil {
+		return shopReviewRes, fmt.Errorf("unable to determine if subforum is shop review, %v", err)
+	}
+	if subforumCategory != "Review"{
+		return shopReviewRes, errors.New("cannot add shop review to non shop review subforums")
+	}
+
 	if len(shopReview.Post.Countries) > 0 {
-		return shopReviewRes, fmt.Errorf("should not have any countries in shop post request, country is determined via lat long")
+		return shopReviewRes, errors.New("should not have any countries in shop post request, country is determined via lat long")
 	}
 
 	// reverse geocode location to determine the location of shop for the country associated with the shop post
