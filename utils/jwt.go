@@ -26,6 +26,7 @@ func GenerateJWTandSetCookie(userID int, username string, email string, c echo.C
 	c.SetCookie(&http.Cookie{
 		Name:     "jwt_token",
 		Value:    token,
+		Path: "/",
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
@@ -37,6 +38,7 @@ func GenerateJWTandSetCookie(userID int, username string, email string, c echo.C
 func RemoveJWTCookie(c echo.Context) {
 	c.SetCookie(&http.Cookie{
 		Name:     "jwt_token",
+		Path: "/",
 		Value:    "",
 		Expires:  time.Now().Add(-1 * time.Hour),
 		HttpOnly: true,

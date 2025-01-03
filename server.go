@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
@@ -62,9 +61,12 @@ func main() {
 	protectedUserRoutes := protected.Group("/users")
 	routes.ProtectedUserRoutes(protectedUserRoutes)
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	// certFile := os.Getenv("SSL_DIR")+"localhost.pem"
+	// keyFile := os.Getenv("SSL_DIR")+"localhost-key.pem"
+	// err := e.StartTLS(":"+port, certFile, keyFile)
+	// if err != nil {
+	// 	log.Fatal("Error starting server: ", err)
+	// }
 	e.Logger.Fatal(e.Start(":" + port))
 
 }
