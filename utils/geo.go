@@ -25,6 +25,10 @@ type Location struct {
 	Country string
 }
 
+func GenerateMapLinkFromLatLng(lat float64, lng float64) string {
+	return fmt.Sprintf("https://www.google.com/maps?q=%f,%f", lat, lng) 
+}
+
 func GetShopLocation(lat float64, lng float64) (*Location, error) {
 	location := new(Location)
 	url := fmt.Sprintf("%s?latlng=%f,%f&key=%s", googleMapsAPIURL, lat, lng, os.Getenv("GOOGLE_MAPS_API_KEY"))

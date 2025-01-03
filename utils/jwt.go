@@ -29,7 +29,7 @@ func GenerateJWTandSetCookie(userID int, username string, email string, c echo.C
 		Path: "/",
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 		Secure:   os.Getenv("GO_ENV") != "development",
 	})
 	return nil
@@ -42,7 +42,7 @@ func RemoveJWTCookie(c echo.Context) {
 		Value:    "",
 		Expires:  time.Now().Add(-1 * time.Hour),
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 		Secure:   os.Getenv("GO_ENV") != "development",
 	})
 }

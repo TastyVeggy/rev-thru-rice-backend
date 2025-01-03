@@ -34,8 +34,6 @@ Create a database to be used by the server
 
 4. Running for the first time, you should set `CREATE_TABLE` to `TRUE` to do the necessary migrations but can be set to false in subsequent runs though not necessary. `SEED_DATA_DIR` is the directory for seeding the initial data and should be left to the default on the first run and can be set to nothing in subsequent runs though not necessary.
 
-5. `GOOGLE_MAPS_API_KEY` will also need to be provided as the geolocation api is used. You can generate your own API key [here](https://console.cloud.google.com/google/maps-apis/overview). Do note billing information is required but there is a 90 day, $300 free trial and you will not be charged if you stay within the monthly quota.
-
 #### Running the backend
 
 1. Install necessary dependencies

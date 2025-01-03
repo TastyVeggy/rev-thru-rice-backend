@@ -25,6 +25,7 @@ func GetSubforumsWithPostCount(c echo.Context) error {
 
 	subforums, err := services.FetchAllSubforumsWithPostCount(countryID)
 	if err != nil {
+		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch subforums with post count: %v", err))
 	}
 	return c.JSON(http.StatusOK, subforums)

@@ -15,6 +15,8 @@ type ShopReqDTO struct {
 	Name string  `json:"name"`
 	Lat  float64 `json:"lat"`
 	Lng  float64 `json:"lng"`
+	Address *string `json:"address"`
+	Country string `json:"country"`
 }
 
 type ShopResDTO struct {
@@ -24,30 +26,20 @@ type ShopResDTO struct {
 }
 
 func AddShop(shop *ShopReqDTO, userID int, postID int) (ShopResDTO, error) {
-	var shopRes ShopResDTO
 
-	location, err := utils.GetShopLocation(shop.Lat, shop.Lng)
-	if err != nil {
-		return shopRes, fmt.Errorf("error in getting location: %v", err)
-	}
-	return addShopInTx(nil, shop, location, userID, postID)
+	return addShopInTx(nil, shop, userID, postID)
 }
 
 func UpdateShop(shop *ShopReqDTO, userID int, shopID int) (ShopResDTO, error) {
 	var shopRes ShopResDTO
 
-	location, err := utils.GetShopLocation(shop.Lat, shop.Lng)
 
+	countryID, err := FetchCountryIDbyName(shop.Country)
 	if err != nil {
-		return shopRes, fmt.Errorf("error in getting location: %v", err)
+		return shopRes, err 
 	}
 
-	countryID, err := FetchCountryIDbyName(location.Country)
-	if err != nil {
-		return shopRes, err
-	}
-
-	shopRes.Country = location.Country
+	shopRes.Country = shop.Country
 
 	tx, err := db.Pool.Begin(context.Background())
 	if err != nil {
@@ -71,8 +63,8 @@ func UpdateShop(shop *ShopReqDTO, userID int, shopID int) (ShopResDTO, error) {
 		countryID,
 		shop.Lat,
 		shop.Lng,
-		&location.Address,
-		location.MapLink,
+		&shop.Address,
+		utils.GenerateMapLinkFromLatLng(shop.Lat, shop.Lng),
 		shopID,
 		userID,
 	).Scan(
@@ -162,16 +154,16 @@ func FetchShopByID(shopID int) (ShopResDTO, error) {
 	return shop, err
 }
 
-func addShopInTx(tx pgx.Tx, shop *ShopReqDTO, location *utils.Location, userID int, postID int) (ShopResDTO, error) {
+func addShopInTx(tx pgx.Tx, shop *ShopReqDTO,  userID int, postID int) (ShopResDTO, error) {
 
 	var shopRes ShopResDTO
 
-	countryID, err := FetchCountryIDbyName(location.Country)
+	countryID, err := FetchCountryIDbyName(shop.Country)
 	if err != nil {
 		return shopRes, err
 	}
 
-	shopRes.Country = location.Country
+	shopRes.Country = shop.Country
 
 	query := `
 		WITH new_shop AS (
@@ -199,8 +191,8 @@ func addShopInTx(tx pgx.Tx, shop *ShopReqDTO, location *utils.Location, userID i
 			countryID,
 			shop.Lat,
 			shop.Lng,
-			&location.Address,
-			location.MapLink,
+			&shop.Address,
+			utils.GenerateMapLinkFromLatLng(shop.Lat, shop.Lng),
 			userID,
 		)
 	} else {
@@ -212,8 +204,8 @@ func addShopInTx(tx pgx.Tx, shop *ShopReqDTO, location *utils.Location, userID i
 			countryID,
 			shop.Lat,
 			shop.Lng,
-			&location.Address,
-			location.MapLink,
+			&shop.Address,
+			utils.GenerateMapLinkFromLatLng(shop.Lat, shop.Lng),
 			userID,
 		)
 	}

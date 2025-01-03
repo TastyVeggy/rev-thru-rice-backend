@@ -7,7 +7,6 @@ import (
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
 	"github.com/TastyVeggy/rev-thru-rice-backend/models"
-	"github.com/TastyVeggy/rev-thru-rice-backend/utils"
 )
 
 type ShopReviewReqDTO struct {
@@ -36,16 +35,10 @@ func AddShopReview(shopReview *ShopReviewReqDTO, userID int, subforumID int) (Sh
 	}
 
 	if len(shopReview.Post.Countries) > 0 {
-		return shopReviewRes, errors.New("should not have any countries in shop post request, country is determined via lat long")
+		return shopReviewRes, errors.New("in request, countries should be blank for post, the country attribute should be filled in for the shop value")
 	}
 
-	// reverse geocode location to determine the location of shop for the country associated with the shop post
-	location, err := utils.GetShopLocation(shopReview.Shop.Lat, shopReview.Shop.Lng)
-	if err != nil {
-		return shopReviewRes, fmt.Errorf("error in getting location: %v", err)
-	}
-
-	shopReview.Post.Countries = append(shopReview.Post.Countries, location.Country)
+	shopReview.Post.Countries = append(shopReview.Post.Countries, shopReview.Shop.Country)
 
 	// Begin the process of adding post, shop and rating
 	tx, err := db.Pool.Begin(context.Background())
@@ -59,7 +52,7 @@ func AddShopReview(shopReview *ShopReviewReqDTO, userID int, subforumID int) (Sh
 		return shopReviewRes, fmt.Errorf("error adding post: %v", err)
 	}
 
-	shopReviewRes.Shop, err = addShopInTx(tx, &shopReview.Shop, location, userID, shopReviewRes.Post.ID)
+	shopReviewRes.Shop, err = addShopInTx(tx, &shopReview.Shop, userID, shopReviewRes.Post.ID)
 	if err != nil {
 		return shopReviewRes, fmt.Errorf("error adding shop: %v", err)
 	}
