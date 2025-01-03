@@ -9,21 +9,21 @@
   {
     "id": 2,
     "name": "Repair Shop Reviews",
-    "description": "Hopefully you haven't crashed, but regular servicing is still a must for long trips!",
+    "description": "Hopefully you didn't just crashed. Nonetheless, make sure to service regularly",
     "category": "Review",
     "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/repair_shop.png"
   },
   {
     "id": 3,
     "name": "Buy/Sell Marketplace",
-    "description": "Marketplace for travellers to buy and sell their motorbikes and gears",
+    "description": "Want to buy a motorbike from another traveller? Plan to sell your gear? Make a post here",
     "category": "Generic",
     "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/buy-sell-marketplace.jpg"
   },
   {
     "id": 4,
     "name": "Tips & Tricks",
-    "description": "First time embarking on motorbike trips or going to Southeast Asia, learn from those who have went before you",
+    "description": "First time embarking on motorbike trips or going to Southeast Asia? Learn from those who have went before you",
     "category": "Generic",
     "image": "https://alexius-lim.s3.ap-southeast-1.amazonaws.com/cvwo-rev-thru-rice/public/media/subforums/tips_and_tricks.jpg"
   },

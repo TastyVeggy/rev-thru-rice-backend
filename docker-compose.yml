@@ -1,17 +1,29 @@
-version: '1'
+version: '3.8'
 
 services:
+  postgres:
+    image: postgres
+    container_name: rev_thru_rice_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: a1b2c3d4
+      POSTGRES_DB: rev_thru_rice
+    ports:
+      - '5432:5432'
+    networks:
+      - rev_thru_rice
   backend:
+    container_name: rev_thru_rice_backend
     build: .
     env_file:
       - .env
-    post:
+    ports:
       - '${PORT}:${PORT}'
-    environment:
-      - PORT=${PORT}
-    deploy:
-      replicas: 3
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
+    depends_on:
+      - postgres
+    networks:
+      - rev_thru_rice
+
+networks:
+  rev_thru_rice:
+    driver: bridge
