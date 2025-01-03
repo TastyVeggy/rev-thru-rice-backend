@@ -32,7 +32,7 @@ func CreateShopReview(c echo.Context) error {
 
 	res := map[string]any{
 		"message":   "Shop post successfully added",
-		"shop_post": shopReviewRes,
+		"review": shopReviewRes,
 	}
 	return c.JSON(http.StatusOK, res)
 

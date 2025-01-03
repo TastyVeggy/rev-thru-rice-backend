@@ -35,7 +35,7 @@ var createTablesQueries = [...]string{
 		CREATE TABLE IF NOT EXISTS posts (
 			id SERIAL PRIMARY KEY, 
 			subforum_id INT NOT NULL,
-			user_id INT,
+			user_id INT NOT NULL,
 			title VARCHAR(255) NOT NULL,
 			content TEXT NOT NULL,
 			comment_count INT DEFAULT 0,
@@ -65,7 +65,7 @@ var createTablesQueries = [...]string{
 		CREATE TABLE IF NOT EXISTS comments (
 			id SERIAL PRIMARY KEY,
 			post_id INT NOT NULL,
-			user_id INT,
+			user_id INT NOT NULL,
 			content TEXT NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
@@ -166,18 +166,5 @@ var createTablesQueries = [...]string{
 		AFTER DELETE ON comments
 		FOR EACH ROW
 		EXECUTE FUNCTION update_comment_count();
-	`,
-	// indexes
-	`
-		CREATE INDEX IF NOT EXISTS idx_posts_title
-		ON posts(title);
-	`,
-	`
-		CREATE INDEX IF NOT EXISTS idx_comments_post_id
-		ON comments(post_id)
-	`,
-	`
-		CREATE INDEX IF NOT EXISTS idx_ratings_shop_post_id
-		ON ratings(shop_id)
 	`,
 }

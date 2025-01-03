@@ -2,7 +2,7 @@
 
 Rev Thru Rice is a forum designed for travellers in Southeast Asia who enjoy exploring this beautiful region on two bikes.
 
-API functions: Authentication; Creation, update and deletion of user (soft delete), post, review, comment and rating;
+API functions: Authentication; Creation, update and deletion of user, post, review, comment and rating;
 
 ## Setup
 
