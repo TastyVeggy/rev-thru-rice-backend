@@ -158,11 +158,12 @@ func FetchPostByID(postID int) (PostResDTO, error) {
 			array_agg(countries.name) as country_names
 		FROM posts
 		JOIN users ON posts.user_id = users.id
-		JOIN post_country pc ON posts.id = pc.post_id
-		JOIN countries ON pc.country_id = countries.id
+		LEFT JOIN post_country pc ON posts.id = pc.post_id
+		LEFT JOIN countries ON pc.country_id = countries.id
 	 	WHERE posts.id = $1
 		GROUP BY posts.id, users.id
 	`
+	var nullableCountries []*string
 	err := db.Pool.QueryRow(context.Background(), query, postID).Scan(
 		&post.ID,
 		&post.SubforumID,
@@ -172,8 +173,19 @@ func FetchPostByID(postID int) (PostResDTO, error) {
 		&post.CommentCount,
 		&post.CreatedAt,
 		&post.Username,
-		&post.Countries,
+		&nullableCountries,
 	)
+
+	if err != nil {
+		return post, err
+	}
+	if nullableCountries[0] == nil {
+		post.Countries = []string{}
+	} else {
+		for i := range nullableCountries{
+			post.Countries = append(post.Countries, *nullableCountries[i])
+		}
+	}
 
 	return post, err
 }
@@ -186,7 +198,8 @@ Eg. The sql query built to find 2nd page posts (where each page is 10 posts) in 
 
 	SELECT posts.*,
 			users.username,
-			array_agg(countries.name) AS country_names
+			array_agg(countries.name) AS country_names,
+			COUNT(*) OVER() as count_post
 	FROM posts
 	JOIN users ON posts.user_id=users.id
 	JOIN post_country pc ON posts.id = pc.post_id
@@ -215,8 +228,8 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 			array_agg(countries.name) AS country_names
 		FROM posts 
 		JOIN users ON posts.user_id=users.id
-		JOIN post_country pc ON posts.id = pc.post_id
-		JOIN countries ON pc.country_id = countries.id
+		LEFT JOIN post_country pc ON posts.id = pc.post_id
+		LEFT JOIN countries ON pc.country_id = countries.id
 	`
 
 	conditions := []string{}
@@ -279,6 +292,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 
 	for rows.Next() {
 		var post PostResDTO
+		var nullableCountries []*string
 		err := rows.Scan(
 			&post.ID,
 			&post.SubforumID,
@@ -288,16 +302,84 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 			&post.CommentCount,
 			&post.CreatedAt,
 			&post.Username,
-			&post.Countries,
+			&nullableCountries,
 		)
 		if err != nil {
 			return nil, err
+		}
+		if nullableCountries[0] == nil {
+			post.Countries=[]string{}
+		} else {
+			for i := range nullableCountries{
+				post.Countries = append(post.Countries, *nullableCountries[i])
+			}
 		}
 		posts = append(posts, post)
 	}
 
 	return posts, nil
 }
+
+func FetchPostCount(subforumID int, userID int, countryIDs []int)(int, error){
+	var err error
+	var totalPostCount int
+
+	query:= `
+		SELECT COUNT(*) AS total_count
+		FROM posts
+		JOIN users ON posts.user_id=users.id
+		LEFT JOIN post_country pc ON posts.id = pc.post_id
+		LEFT JOIN countries ON pc.country_id = countries.id
+	`
+
+	conditions := []string{}
+	placeholdersIndex := 1
+	params := []any{}
+	if len(countryIDs) > 0 {
+		placeholders := []string{}
+		for i := range countryIDs{
+			placeholders = append(placeholders, fmt.Sprintf("$%d", placeholdersIndex))
+			params = append(params, countryIDs[i])
+			placeholdersIndex++
+		}
+		placeholderString := strings.Join(placeholders, ",")
+		condition := fmt.Sprintf(`
+			posts.id IN (
+				SELECT DISTINCT pc.post_id
+				FROM post_country pc
+				JOIN countries 
+				ON pc.country_id = countries.id
+				WHERE pc.country_id IN (%s)
+			)
+		`, placeholderString)
+		conditions = append(conditions, condition)
+	}
+
+	if subforumID > 0 {
+		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.subforum_id", placeholdersIndex))
+		params = append(params, subforumID)
+		placeholdersIndex++
+	} 
+
+	if userID > 0 {
+		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.user_id", placeholdersIndex))
+		params = append(params, userID)
+		placeholdersIndex++
+	}
+
+	if len(conditions) > 0 {
+		query += fmt.Sprintf("WHERE %s", strings.Join(conditions, " AND "))
+	}
+
+	err = db.Pool.QueryRow(context.Background(), query, params...).Scan(&totalPostCount)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return totalPostCount, err
+}
+
 
 func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int, subforumID int) (PostResDTO, error) {
 	var postRes PostResDTO

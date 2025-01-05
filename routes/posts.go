@@ -9,6 +9,7 @@ import (
 // posts
 func PostRoutes(g *echo.Group) {
 	g.GET("", post.GetPosts)
+	g.GET("/count", post.GetPostCount)
 	g.GET("/:id", post.GetPost)
 }
 
