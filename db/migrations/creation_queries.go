@@ -147,9 +147,9 @@ var createTablesQueries = [...]string{
 			SET comment_count = (
 				SELECT COUNT(*)
 				FROM comments
-				WHERE post_id = NEW.post_id
+				WHERE post_id = COALESCE(NEW.post_id, OLD.post_id)
 			)
-			WHERE id = NEW.post_id;
+			WHERE id = COALESCE(NEW.post_id, OLD.post_id);
 
 			RETURN NEW;
 		END;
