@@ -10,8 +10,7 @@ func UserRoutes(g *echo.Group) {
 }
 
 func ProtectedUserRoutes(g *echo.Group) {
-	// TODO: edit user password and info and profile pic
-	// g.PUT("", user.EditUser)
-	// soft delete
+	g.PUT("/info", user.EditUserInfo)
+	g.PUT("/password", user.EditPassword)
 	g.DELETE("", user.DeleteUser)
 }

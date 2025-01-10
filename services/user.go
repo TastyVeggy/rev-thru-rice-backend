@@ -34,6 +34,16 @@ type LoginReqDTO struct {
 	Password string `json:"password"`
 }
 
+type UpdatePasswordReqDTO struct {
+	Password        string `json:"password" validate:"required,min=6"`
+	ConfirmPassword string `json:"confirm_password" validate:"required,eqfield=Password"`
+}
+
+type UpdateUserInfoReqDTO struct {
+	Username        string `json:"username" validate:"required,min=3,max=30"`
+	Email           string `json:"email" validate:"required,email"`
+}
+
 func AddUser(user *UserReqDTO) (UserResDTO, error) {
 	var userRes UserResDTO
 
@@ -126,36 +136,67 @@ func LoginUser(user *LoginReqDTO) (UserResDTO, error) {
 	return userRes, nil
 }
 
-// TODO: Update user info and password methods
-// func UpdateUserInfo(user *UserReqDTO, userID int) (UserResDTO, error){
-// 	var userRes UserResDTO
+func UpdatePassword(password *UpdatePasswordReqDTO, userID int)(error){
+	err := utils.Validator.Struct(password)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			return fmt.Errorf("validation failed: %v", err)
+		}
+	}
 
-// 	var row pgx.Row
-// 	if user.Password == ""{
-// 		query := `
-// 			UPDATE users
-// 			SET username=$1, email=$2
-// 			WHERE id=$3
-// 			RETURNING *
-// 		`
-// 		row = db.Pool.QueryRow(
-// 			context.Background(),
-// 			query,
-// 			user.Username,
-// 			user.Email,
-// 			userID,
-// 		)
-// 	} else {
-// 		query :=
-// 	}
+	if password.Password != password.ConfirmPassword {
+		return  errors.New("confirm password does not match")
+	}
 
-// 	query := `
-// 		WITH new_user AS (
-// 			INSERT INTO users (username, )
-// 		)
-// 	`
-// 	return userRes, nil
-// }
+	// can finally add user
+	hashedPassword, err := utils.HashPassword(password.Password)
+	if err != nil {
+		return fmt.Errorf("error adding new user: %v", err)
+	}
+
+	query := `
+		UPDATE users
+		SET password=$1
+		WHERE user_id=$2
+	`
+
+	commandTag, err := db.Pool.Exec(context.Background(), query, hashedPassword, userID)
+	if commandTag.RowsAffected() == 0 {
+		return errors.New("no row affected")
+	}
+	return err
+}
+
+
+func UpdateUserInfo(user *UpdateUserInfoReqDTO, userID int) (UserResDTO, error){
+	var userRes UserResDTO
+
+	query := `
+			UPDATE users
+			SET username=$1, email=$2
+			WHERE id=$3
+			RETURNING id, username, email, created_at, profile_pic
+		`
+	err := db.Pool.QueryRow(
+			context.Background(),
+			query,
+			user.Username,
+			user.Email,
+			userID,
+		).Scan(
+			&userRes.ID,
+			&userRes.Username,
+			&userRes.Email,
+			&userRes.CreatedAt,
+			&userRes.ProfilePic,
+		)
+
+	if err != nil {
+		return userRes, err
+	}
+
+	return userRes, nil
+}
 
 func RemoveUser(id int) error {
 	query := `
