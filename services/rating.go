@@ -52,6 +52,36 @@ func FetchRatingByShopandUser(shopID int, userID int) (RatingResDTO, error) {
 	return ratingRes, err
 }
 
+func FetchRatingByPostandUser(postID int, userID int) (RatingResDTO, error) {
+	var ratingRes RatingResDTO
+
+	query := `
+		SELECT ratings.*, shops.name, users.username 
+		FROM ratings
+		JOIN shops on ratings.shop_id = shops.id
+		JOIN posts on posts.id=shops.post_id
+		JOIN users on ratings.user_id = users.id
+		WHERE shops.post_id = $1 AND ratings.user_id = $2
+	`
+
+	err := db.Pool.QueryRow(
+		context.Background(),
+		query,
+		postID,
+		userID,
+	).Scan(
+		&ratingRes.ID,
+		&ratingRes.ShopID,
+		&ratingRes.UserID,
+		&ratingRes.Score,
+		&ratingRes.CreatedAt,
+		&ratingRes.ShopName,
+		&ratingRes.Username,
+	)
+
+	return ratingRes, err
+}
+
 func UpdateRating(rating *RatingReqDTO, userID int, shopID int) (RatingResDTO, error) {
 	var ratingRes RatingResDTO
 	query := `
