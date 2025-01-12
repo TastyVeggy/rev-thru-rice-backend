@@ -67,10 +67,9 @@ func AddUser(user *UserReqDTO) (UserResDTO, error) {
 	query := `
 		INSERT INTO users (username, email, password)
 		VALUES ($1,$2,$3)
-		RETURNING *
+		RETURNING id, username, email, created_at, profile_pic
 	`
 
-	var password_store string
 
 	err = db.Pool.QueryRow(
 		context.Background(),
@@ -82,7 +81,6 @@ func AddUser(user *UserReqDTO) (UserResDTO, error) {
 		&userRes.ID,
 		&userRes.Username,
 		&userRes.Email,
-		&password_store,
 		&userRes.CreatedAt,
 		&userRes.ProfilePic,
 	)
@@ -103,7 +101,7 @@ func LoginUser(user *LoginReqDTO) (UserResDTO, error) {
 	var userRes UserResDTO
 
 	// First get all data of user by name
-	query := "SELECT * FROM users WHERE username = $1"
+	query := "SELECT * FROM users WHERE username = $1 AND username IS NOT NULL"
 
 	var storedHashedPassword string
 	err := db.Pool.QueryRow(
@@ -157,7 +155,7 @@ func UpdatePassword(password *UpdatePasswordReqDTO, userID int)(error){
 	query := `
 		UPDATE users
 		SET password=$1
-		WHERE user_id=$2
+		WHERE id=$2 AND username IS NOT NULL
 	`
 
 	commandTag, err := db.Pool.Exec(context.Background(), query, hashedPassword, userID)
@@ -170,14 +168,20 @@ func UpdatePassword(password *UpdatePasswordReqDTO, userID int)(error){
 
 func UpdateUserInfo(user *UpdateUserInfoReqDTO, userID int) (UserResDTO, error){
 	var userRes UserResDTO
+	err := utils.Validator.Struct(user)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			return userRes, fmt.Errorf("validation failed: %v", err)
+		}
+	}
 
 	query := `
 			UPDATE users
 			SET username=$1, email=$2
-			WHERE id=$3
+			WHERE id=$3 AND username IS NOT NULL 
 			RETURNING id, username, email, created_at, profile_pic
 		`
-	err := db.Pool.QueryRow(
+	err = db.Pool.QueryRow(
 			context.Background(),
 			query,
 			user.Username,
@@ -192,6 +196,15 @@ func UpdateUserInfo(user *UpdateUserInfoReqDTO, userID int) (UserResDTO, error){
 		)
 
 	if err != nil {
+		if err.Error() == `duplicate key value violates unique constraint "users_username_key` {
+			err = errors.New("username has been taken")
+		} else if err.Error() == `duplicate key value violates unique constraint "users_email_key` {
+			err = errors.New("email has been taken")
+		} else if err == pgx.ErrNoRows{
+			return userRes, err
+		} else {
+			err = fmt.Errorf("error adding new user: %v", err)
+		}
 		return userRes, err
 	}
 
@@ -201,10 +214,11 @@ func UpdateUserInfo(user *UpdateUserInfoReqDTO, userID int) (UserResDTO, error){
 func RemoveUser(id int) error {
 	query := `
 		UPDATE users
-		SET username=NULL,email=NULL,password=NULL,created_at=NULL,profile_pic=''
-		WHERE id=$1 
+		SET username=NULL, email=NULL, password=NULL, profile_pic='' 
+		WHERE id=$1 AND username IS NOT NULL 
 	`
 	commandTag, err := db.Pool.Exec(context.Background(), query, id)
+	fmt.Println(err)
 	if commandTag.RowsAffected() == 0 {
 		return errors.New("no row affected")
 	}
@@ -214,11 +228,14 @@ func RemoveUser(id int) error {
 func FetchUserByID(id int) (UserResDTO, error) {
 	var user UserResDTO
 
-	query := "SELECT username, email FROM users WHERE id = $1"
+	query := "SELECT id, username, email, created_at, profile_pic FROM users WHERE id = $1 AND username IS NOT NULL"
 
 	err := db.Pool.QueryRow(context.Background(), query, id).Scan(
+		&user.ID,
 		&user.Username,
 		&user.Email,
+		&user.CreatedAt,
+		&user.ProfilePic,
 	)
 
 	return user, err

@@ -21,8 +21,10 @@ func EditUserInfo(c echo.Context) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows in result set"){
 			return c.String(http.StatusNotFound, "User cannot be found")
+		} else if strings.Contains(err.Error(), "error updating new user:"){
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to update user info: %v", err))
+		return c.String(http.StatusBadRequest, err.Error())
 	}
 
 	res := map[string]any{

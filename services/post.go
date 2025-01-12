@@ -13,7 +13,7 @@ import (
 
 type PostResDTO struct {
 	models.Post
-	Username  string   `json:"username"`
+	Username  *string   `json:"username"`
 	Countries []string `json:"countries"`
 }
 
@@ -187,6 +187,11 @@ func FetchPostByID(postID int) (PostResDTO, error) {
 		}
 	}
 
+	if (post.Username == nil){
+		deletedUsername := "[deleted]"
+		post.Username = &deletedUsername
+	}
+
 	return post, err
 }
 
@@ -313,6 +318,10 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 			for i := range nullableCountries{
 				post.Countries = append(post.Countries, *nullableCountries[i])
 			}
+		}
+		if post.Username == nil {
+			deletedUsername := "[deleted]"
+			post.Username=&deletedUsername
 		}
 		posts = append(posts, post)
 	}

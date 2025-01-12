@@ -16,7 +16,7 @@ type RatingReqDTO struct {
 type RatingResDTO struct {
 	models.Rating
 	ShopName string `json:"shop_name"`
-	Username string `json:"username"`
+	Username *string `json:"username"`
 }
 
 func AddRating(rating *RatingReqDTO, shopID int, userID int) (RatingResDTO, error) {
@@ -48,6 +48,10 @@ func FetchRatingByShopandUser(shopID int, userID int) (RatingResDTO, error) {
 		&ratingRes.ShopName,
 		&ratingRes.Username,
 	)
+	if (ratingRes.Username == nil){
+		deletedUsername := "[deleted]"
+		ratingRes.Username = &deletedUsername
+	}
 
 	return ratingRes, err
 }

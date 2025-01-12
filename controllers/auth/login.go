@@ -25,7 +25,7 @@ func Login(c echo.Context) error {
 		}
 	}
 
-	err = utils.GenerateJWTandSetCookie(userRes.ID, userRes.Username, userRes.Email, c)
+	err = utils.GenerateJWTandSetCookie(userRes.ID, c)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Login credentials are correct but unable to generate JWT token or set cookie: %v", err))
 	}

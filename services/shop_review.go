@@ -122,6 +122,11 @@ func FetchShopReviewByPostID(postID int) (ShopReviewResDTO, error){
 		return shopReviewRes, err
 	}
 
+	if (shopReviewRes.Post.Username == nil){
+		deletedUsername := "[deleted]"
+		shopReviewRes.Post.Username = &deletedUsername
+	}
+
 	shopReviewRes.Post.Countries=[]string{shopReviewRes.Shop.Country}
 	shopReviewRes.Shop.PostTitle=shopReviewRes.Post.Title
 	shopReviewRes.Shop.PostID=shopReviewRes.Post.ID

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
@@ -61,13 +62,16 @@ func main() {
 	protectedUserRoutes := protected.Group("/users")
 	routes.ProtectedUserRoutes(protectedUserRoutes)
 
-	// certFile := os.Getenv("SSL_DIR")+"localhost.pem"
-	// keyFile := os.Getenv("SSL_DIR")+"localhost-key.pem"
-	// err := e.StartTLS(":"+port, certFile, keyFile)
-	// if err != nil {
-	// 	log.Fatal("Error starting server: ", err)
-	// }
-	e.Logger.Fatal(e.Start(":" + port))
+	if os.Getenv("GO_ENV") == "production"{
+		certFile := os.Getenv("SSL_DIR")+"localhost.pem"
+		keyFile := os.Getenv("SSL_DIR")+"localhost-key.pem"
+		err := e.StartTLS(":"+port, certFile, keyFile)
+		if err != nil {
+			log.Fatal("Error starting server: ", err)
+		}
+	} else {
+		e.Logger.Fatal(e.Start(":" + port))
+	}
 
 }
 

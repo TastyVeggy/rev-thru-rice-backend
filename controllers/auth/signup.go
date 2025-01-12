@@ -31,7 +31,7 @@ func Signup(c echo.Context) error {
 		}
 	}
 
-	err = utils.GenerateJWTandSetCookie(userRes.ID, userRes.Username, userRes.Email, c)
+	err = utils.GenerateJWTandSetCookie(userRes.ID, c)
 	var res map[string]any
 	if err != nil {
 		res = map[string]any{
