@@ -10,7 +10,7 @@ API functions: Authentication; Creation, update and deletion of user, post, revi
 
 1. Make a copy of `.exampleenv` and name the copy `.env` and change the necessary settings. You should not need to change the `DATABASE_URL`
 
-2. Set up and run a containerised local deployment consisting of both the backend server and the database
+2. Set up and run a containerised local deployment consisting of both the backend server and the database. You should run the following command in the same folder as your .env file
 
    ```
    docker compose up -d

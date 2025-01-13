@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"net/http"
 	"os"
 
 	"github.com/TastyVeggy/rev-thru-rice-backend/db"
@@ -21,6 +21,10 @@ func main() {
 	e := echo.New()
 
 	e.Use(middleware.CORS(os.Getenv("FRONTEND_URLS")))
+
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Rev thru rice api")
+	})
 
 	// Public Routes
 	// login/logout/signup
@@ -62,16 +66,7 @@ func main() {
 	protectedUserRoutes := protected.Group("/users")
 	routes.ProtectedUserRoutes(protectedUserRoutes)
 
-	if os.Getenv("GO_ENV") == "production"{
-		certFile := os.Getenv("SSL_DIR")+"localhost.pem"
-		keyFile := os.Getenv("SSL_DIR")+"localhost-key.pem"
-		err := e.StartTLS(":"+port, certFile, keyFile)
-		if err != nil {
-			log.Fatal("Error starting server: ", err)
-		}
-	} else {
-		e.Logger.Fatal(e.Start(":" + port))
-	}
+	e.Logger.Fatal(e.Start(":"+port))
 
 }
 

@@ -21,28 +21,54 @@ func GenerateJWTandSetCookie(userID int, c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	c.SetCookie(&http.Cookie{
-		Name:     "jwt_token",
-		Value:    token,
-		Path: "/",
-		Expires:  time.Now().Add(24 * time.Hour),
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-		Secure:   true,
-	})
+	if os.Getenv("GO_ENV") == "production" {
+		c.SetCookie(&http.Cookie{
+			Name:     "jwt_token",
+			Value:    token,
+			Path: "/",
+			Domain: os.Getenv("JWT_DOMAIN"),
+			Expires:  time.Now().Add(24 * time.Hour),
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			Secure:   true,
+		})
+	} else {
+		c.SetCookie(&http.Cookie{
+			Name:     "jwt_token",
+			Value:    token,
+			Path: "/",
+			Expires:  time.Now().Add(24 * time.Hour),
+			HttpOnly: true,
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
+		})
+	}
 	return nil
 }
 
 func RemoveJWTCookie(c echo.Context) {
-	c.SetCookie(&http.Cookie{
-		Name:     "jwt_token",
-		Path: "/",
-		Value:    "",
-		Expires:  time.Now().Add(-1 * time.Hour),
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-		Secure:   true,
-	})
+	if os.Getenv("GO_ENV") == "production" {
+		c.SetCookie(&http.Cookie{
+			Name:     "jwt_token",
+			Value:    "",
+			Path: "/",
+			Domain: os.Getenv("JWT_DOMAIN"),
+			Expires:  time.Now().Add(-1 * time.Hour),
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			Secure:   true,
+		})
+	} else {
+		c.SetCookie(&http.Cookie{
+			Name:     "jwt_token",
+			Value:    "",
+			Path: "/",
+			Expires:  time.Now().Add(-1 * time.Hour),
+			HttpOnly: true,
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
+		})
+	}
 }
 
 func generateJWT(userID int) (string, error) {
