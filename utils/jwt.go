@@ -25,8 +25,8 @@ func GenerateJWTandSetCookie(userID int, c echo.Context) error {
 		c.SetCookie(&http.Cookie{
 			Name:     "jwt_token",
 			Value:    token,
-			Path: "/",
-			Domain: os.Getenv("JWT_DOMAIN"),
+			Path:     "/",
+			Domain:   os.Getenv("JWT_DOMAIN"),
 			Expires:  time.Now().Add(24 * time.Hour),
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
@@ -36,7 +36,7 @@ func GenerateJWTandSetCookie(userID int, c echo.Context) error {
 		c.SetCookie(&http.Cookie{
 			Name:     "jwt_token",
 			Value:    token,
-			Path: "/",
+			Path:     "/",
 			Expires:  time.Now().Add(24 * time.Hour),
 			HttpOnly: true,
 			SameSite: http.SameSiteNoneMode,
@@ -51,8 +51,8 @@ func RemoveJWTCookie(c echo.Context) {
 		c.SetCookie(&http.Cookie{
 			Name:     "jwt_token",
 			Value:    "",
-			Path: "/",
-			Domain: os.Getenv("JWT_DOMAIN"),
+			Path:     "/",
+			Domain:   os.Getenv("JWT_DOMAIN"),
 			Expires:  time.Now().Add(-1 * time.Hour),
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
@@ -62,7 +62,7 @@ func RemoveJWTCookie(c echo.Context) {
 		c.SetCookie(&http.Cookie{
 			Name:     "jwt_token",
 			Value:    "",
-			Path: "/",
+			Path:     "/",
 			Expires:  time.Now().Add(-1 * time.Hour),
 			HttpOnly: true,
 			SameSite: http.SameSiteNoneMode,
@@ -75,7 +75,7 @@ func generateJWT(userID int) (string, error) {
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: strconv.Itoa(userID),
+			Subject:   strconv.Itoa(userID),
 			Issuer:    "rev-thru-rice",
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		},
@@ -107,34 +107,33 @@ func parseJWT(tokenStr string) (*Claims, error) {
 	return claims, nil
 }
 
-func CheckTokenValidity(c echo.Context) (*Claims,error) {
-		var tokenString string
+func CheckTokenValidity(c echo.Context) (*Claims, error) {
+	var tokenString string
 
-		authHeader := c.Request().Header.Get("Authorization")
-		if authHeader != "" {
-			if len(authHeader) > 7 && authHeader[:7] == "Bearer "{
-				tokenString = authHeader[7:]
-			} else {
-				return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid Authorization header")
-			}
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader != "" {
+		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			tokenString = authHeader[7:]
+		} else {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid Authorization header")
 		}
+	}
 
-		if tokenString == ""{
-			cookie, err := c.Cookie("jwt_token")
-			if err == nil {
-				tokenString = cookie.Value
-			}
+	if tokenString == "" {
+		cookie, err := c.Cookie("jwt_token")
+		if err == nil {
+			tokenString = cookie.Value
 		}
+	}
 
-		if tokenString == "" {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Missing JWT token")
-		}
+	if tokenString == "" {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Missing JWT token")
+	}
 
+	claims, err := parseJWT(tokenString)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
+	}
 
-		claims, err := parseJWT(tokenString)
-		if err != nil {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
-		}
-
-		return claims, nil
+	return claims, nil
 }

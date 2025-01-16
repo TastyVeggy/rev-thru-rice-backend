@@ -16,8 +16,8 @@ type ShopReviewReqDTO struct {
 }
 
 type ShopReviewResDTO struct {
-	Post   PostResDTO   `json:"post"`
-	Shop   ShopResDTO   `json:"shop"`
+	Post PostResDTO `json:"post"`
+	Shop ShopResDTO `json:"shop"`
 }
 
 type ShopReviewCreationResDTO struct {
@@ -35,7 +35,7 @@ func AddShopReview(shopReview *ShopReviewReqDTO, userID int, subforumID int) (Sh
 	if err != nil {
 		return shopReviewRes, fmt.Errorf("unable to determine if subforum is shop review, %v", err)
 	}
-	if subforumCategory != "Review"{
+	if subforumCategory != "Review" {
 		return shopReviewRes, errors.New("cannot add shop review to non shop review subforums")
 	}
 
@@ -71,8 +71,7 @@ func AddShopReview(shopReview *ShopReviewReqDTO, userID int, subforumID int) (Sh
 	return shopReviewRes, err
 }
 
-
-func FetchShopReviewByPostID(postID int) (ShopReviewResDTO, error){
+func FetchShopReviewByPostID(postID int) (ShopReviewResDTO, error) {
 	var shopReviewRes ShopReviewResDTO
 
 	query := `
@@ -122,14 +121,14 @@ func FetchShopReviewByPostID(postID int) (ShopReviewResDTO, error){
 		return shopReviewRes, err
 	}
 
-	if (shopReviewRes.Post.Username == nil){
+	if shopReviewRes.Post.Username == nil {
 		deletedUsername := "[deleted]"
 		shopReviewRes.Post.Username = &deletedUsername
 	}
 
-	shopReviewRes.Post.Countries=[]string{shopReviewRes.Shop.Country}
-	shopReviewRes.Shop.PostTitle=shopReviewRes.Post.Title
-	shopReviewRes.Shop.PostID=shopReviewRes.Post.ID
-	
+	shopReviewRes.Post.Countries = []string{shopReviewRes.Shop.Country}
+	shopReviewRes.Shop.PostTitle = shopReviewRes.Post.Title
+	shopReviewRes.Shop.PostID = shopReviewRes.Post.ID
+
 	return shopReviewRes, err
 }

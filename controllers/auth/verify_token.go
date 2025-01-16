@@ -17,17 +17,17 @@ func VerifyToken(c echo.Context) error {
 	}
 
 	user, err := services.FetchUserByID(claims.UserID)
-	if (err != nil){
-		if strings.Contains(err.Error(), "no rows in result"){
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result") {
 			return c.String(http.StatusNotFound, "user not found")
 		}
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch user: %v", err))
 	}
 
 	res := map[string]any{
-		"id": user.ID,
+		"id":       user.ID,
 		"username": user.Username,
-		"email": user.Email,
+		"email":    user.Email,
 	}
 	return c.JSON(http.StatusOK, res)
 }

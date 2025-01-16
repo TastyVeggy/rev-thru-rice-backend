@@ -9,16 +9,16 @@ import (
 
 type PostCountResDTO struct {
 	SubforumID int `json:"subforum_id"`
-	PostCount int `json:"post_count"`
+	PostCount  int `json:"post_count"`
 }
 
 type SubforumResDTO struct {
 	models.Subforum
-	PostCount int `json:"post_count"`
+	PostCount int  `json:"post_count"`
 	CountryID *int `json:"country_id"`
 }
 
-func FetchSubforumPostCountsbyCountryID(countryID int) ([]PostCountResDTO, error){
+func FetchSubforumPostCountsbyCountryID(countryID int) ([]PostCountResDTO, error) {
 	var postCountsRes []PostCountResDTO
 	var params []any
 
@@ -60,7 +60,7 @@ func FetchSubforumPostCountsbyCountryID(countryID int) ([]PostCountResDTO, error
 func FetchAllSubforumsWithPostCount(countryID *int) ([]SubforumResDTO, error) {
 	var subforumsRes []SubforumResDTO
 	var params []any
-	
+
 	// I'm sure there is a way to do it with one sql query using left joins but the existence of posts without any country makes it tricky but this works for now
 	subforums, err := models.FetchAllSubforums()
 	if err != nil {
@@ -82,7 +82,7 @@ func FetchAllSubforumsWithPostCount(countryID *int) ([]SubforumResDTO, error) {
 		JOIN posts on subforums.id = posts.subforum_id
 	`
 
-	if countryID != nil{
+	if countryID != nil {
 		query += `
 			JOIN post_country pc ON posts.id = pc.post_id
 			WHERE pc.country_id = $1
@@ -112,4 +112,3 @@ func FetchAllSubforumsWithPostCount(countryID *int) ([]SubforumResDTO, error) {
 	}
 	return subforumsRes, nil
 }
-

@@ -40,8 +40,8 @@ type UpdatePasswordReqDTO struct {
 }
 
 type UpdateUserInfoReqDTO struct {
-	Username        string `json:"username" validate:"required,min=3,max=30"`
-	Email           string `json:"email" validate:"required,email"`
+	Username string `json:"username" validate:"required,min=3,max=30"`
+	Email    string `json:"email" validate:"required,email"`
 }
 
 func AddUser(user *UserReqDTO) (UserResDTO, error) {
@@ -69,7 +69,6 @@ func AddUser(user *UserReqDTO) (UserResDTO, error) {
 		VALUES ($1,$2,$3)
 		RETURNING id, username, email, created_at, profile_pic
 	`
-
 
 	err = db.Pool.QueryRow(
 		context.Background(),
@@ -134,7 +133,7 @@ func LoginUser(user *LoginReqDTO) (UserResDTO, error) {
 	return userRes, nil
 }
 
-func UpdatePassword(password *UpdatePasswordReqDTO, userID int)(error){
+func UpdatePassword(password *UpdatePasswordReqDTO, userID int) error {
 	err := utils.Validator.Struct(password)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -143,7 +142,7 @@ func UpdatePassword(password *UpdatePasswordReqDTO, userID int)(error){
 	}
 
 	if password.Password != password.ConfirmPassword {
-		return  errors.New("confirm password does not match")
+		return errors.New("confirm password does not match")
 	}
 
 	// can finally add user
@@ -165,8 +164,7 @@ func UpdatePassword(password *UpdatePasswordReqDTO, userID int)(error){
 	return err
 }
 
-
-func UpdateUserInfo(user *UpdateUserInfoReqDTO, userID int) (UserResDTO, error){
+func UpdateUserInfo(user *UpdateUserInfoReqDTO, userID int) (UserResDTO, error) {
 	var userRes UserResDTO
 	err := utils.Validator.Struct(user)
 	if err != nil {
@@ -182,25 +180,25 @@ func UpdateUserInfo(user *UpdateUserInfoReqDTO, userID int) (UserResDTO, error){
 			RETURNING id, username, email, created_at, profile_pic
 		`
 	err = db.Pool.QueryRow(
-			context.Background(),
-			query,
-			user.Username,
-			user.Email,
-			userID,
-		).Scan(
-			&userRes.ID,
-			&userRes.Username,
-			&userRes.Email,
-			&userRes.CreatedAt,
-			&userRes.ProfilePic,
-		)
+		context.Background(),
+		query,
+		user.Username,
+		user.Email,
+		userID,
+	).Scan(
+		&userRes.ID,
+		&userRes.Username,
+		&userRes.Email,
+		&userRes.CreatedAt,
+		&userRes.ProfilePic,
+	)
 
 	if err != nil {
 		if err.Error() == `duplicate key value violates unique constraint "users_username_key` {
 			err = errors.New("username has been taken")
 		} else if err.Error() == `duplicate key value violates unique constraint "users_email_key` {
 			err = errors.New("email has been taken")
-		} else if err == pgx.ErrNoRows{
+		} else if err == pgx.ErrNoRows {
 			return userRes, err
 		} else {
 			err = fmt.Errorf("error adding new user: %v", err)

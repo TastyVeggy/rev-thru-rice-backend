@@ -10,8 +10,8 @@ type Subforum struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Category string `json:"category"`
-	Image string `json:"image"`
+	Category    string `json:"category"`
+	Image       string `json:"image"`
 }
 
 func FetchAllSubforums() ([]Subforum, error) {
@@ -36,7 +36,7 @@ func FetchAllSubforums() ([]Subforum, error) {
 	return subforums, nil
 }
 
-func FetchSubforumCategorybyID(ID int)(string, error){
+func FetchSubforumCategorybyID(ID int) (string, error) {
 	var category string
 
 	query := "SELECT category FROM subforums WHERE id=$1"

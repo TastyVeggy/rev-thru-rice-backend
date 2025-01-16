@@ -16,7 +16,7 @@ type CommentReqDTO struct {
 
 type CommentResDTO struct {
 	models.Comment
-	PostTitle string `json:"post_title"`
+	PostTitle string  `json:"post_title"`
 	Username  *string `json:"username"`
 }
 
@@ -152,7 +152,7 @@ func FetchComments(limit int, offset int, postID int, userID int) ([]CommentResD
 		if err != nil {
 			return nil, err
 		}
-		if (comment.Username == nil){
+		if comment.Username == nil {
 			deletedUsername := "[deleted]"
 			comment.Username = &deletedUsername
 		}

@@ -67,5 +67,5 @@ func GetPosts(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Unable to fetch posts: %v", err))
 	}
 
-	return c.JSON(http.StatusOK,  posts)
+	return c.JSON(http.StatusOK, posts)
 }

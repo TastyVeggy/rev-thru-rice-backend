@@ -19,9 +19,9 @@ func EditUserInfo(c echo.Context) error {
 
 	userRes, err := services.UpdateUserInfo(newUserInfoReq, userID)
 	if err != nil {
-		if strings.Contains(err.Error(), "no rows in result set"){
+		if strings.Contains(err.Error(), "no rows in result set") {
 			return c.String(http.StatusNotFound, "User cannot be found")
-		} else if strings.Contains(err.Error(), "error updating new user:"){
+		} else if strings.Contains(err.Error(), "error updating new user:") {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.String(http.StatusBadRequest, err.Error())

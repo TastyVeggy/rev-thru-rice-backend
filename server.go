@@ -30,7 +30,7 @@ func main() {
 	// login/logout/signup
 	authRoutes := e.Group("/auth")
 	routes.AuthRoutes(authRoutes)
-	// viewing subforum is public 
+	// viewing subforum is public
 	subforumRoutes := e.Group("/subforums")
 	routes.SubforumRoutes(subforumRoutes)
 	// viewing countries is public
@@ -45,7 +45,6 @@ func main() {
 	//viewing shops is public
 	shopRoutes := e.Group("/shops")
 	routes.ShopRoutes(shopRoutes)
-
 
 	// Protected Routes
 	protected := e.Group("/protected")
@@ -66,7 +65,7 @@ func main() {
 	protectedUserRoutes := protected.Group("/users")
 	routes.ProtectedUserRoutes(protectedUserRoutes)
 
-	e.Logger.Fatal(e.Start(":"+port))
+	e.Logger.Fatal(e.Start(":" + port))
 
 }
 

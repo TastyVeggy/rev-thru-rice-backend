@@ -13,14 +13,14 @@ import (
 
 type PostResDTO struct {
 	models.Post
-	Username  *string   `json:"username"`
+	Username  *string  `json:"username"`
 	Countries []string `json:"countries"`
 }
 
 type PostReqDTO struct {
-	Title      string   `json:"title"`
-	Content    string   `json:"content"`
-	Countries  []string `json:"countries"`
+	Title     string   `json:"title"`
+	Content   string   `json:"content"`
+	Countries []string `json:"countries"`
 }
 
 // for generic posts (not shop subforums)
@@ -31,7 +31,7 @@ func AddPost(post *PostReqDTO, userID int, subforumID int) (PostResDTO, error) {
 	if err != nil {
 		return postRes, fmt.Errorf("unable to determine if subforum is generic, %v", err)
 	}
-	if subforumCategory == "Review"{
+	if subforumCategory == "Review" {
 		return postRes, errors.New("cannot add generic post in shop review subforums")
 	}
 
@@ -89,7 +89,7 @@ func UpdatePost(post *PostReqDTO, postID int, userID int) (PostResDTO, error) {
 	)
 
 	if err != nil {
-		if err == pgx.ErrNoRows{
+		if err == pgx.ErrNoRows {
 			return postRes, errors.New("user unauthorised to change this post or post not found")
 		}
 		return postRes, fmt.Errorf("error updating entry in posts")
@@ -182,12 +182,12 @@ func FetchPostByID(postID int) (PostResDTO, error) {
 	if nullableCountries[0] == nil {
 		post.Countries = []string{}
 	} else {
-		for i := range nullableCountries{
+		for i := range nullableCountries {
 			post.Countries = append(post.Countries, *nullableCountries[i])
 		}
 	}
 
-	if (post.Username == nil){
+	if post.Username == nil {
 		deletedUsername := "[deleted]"
 		post.Username = &deletedUsername
 	}
@@ -204,11 +204,10 @@ Eg. The sql query built to find 2nd page posts (where each page is 10 posts) in 
 	SELECT posts.*,
 			users.username,
 			array_agg(countries.name) AS country_names,
-			COUNT(*) OVER() as count_post
 	FROM posts
 	JOIN users ON posts.user_id=users.id
-	JOIN post_country pc ON posts.id = pc.post_id
-	JOIN countries ON pc.country_id = countries.id
+	LEFT JOIN post_country pc ON posts.id = pc.post_id
+	LEFT JOIN countries ON pc.country_id = countries.id
 	WHERE posts.id IN (
 		SELECT DISTINCT pc.post_id
 		FROM post_country pc
@@ -216,7 +215,7 @@ Eg. The sql query built to find 2nd page posts (where each page is 10 posts) in 
 		ON pc.country_id = countries.id
 		WHERE pc.country_id IN (1,2)
 	)
-	AND posts.subforum_id=3 
+	AND posts.subforum_id=3
 	AND posts.user_id=4
 	GROUP BY posts.id, users.id
 	ORDER BY posts.created_at DESC
@@ -242,7 +241,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 	params := []any{}
 	if len(countryIDs) > 0 {
 		placeholders := []string{}
-		for i := range countryIDs{
+		for i := range countryIDs {
 			placeholders = append(placeholders, fmt.Sprintf("$%d", placeholdersIndex))
 			params = append(params, countryIDs[i])
 			placeholdersIndex++
@@ -264,7 +263,7 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.subforum_id", placeholdersIndex))
 		params = append(params, subforumID)
 		placeholdersIndex++
-	} 
+	}
 
 	if userID > 0 {
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.user_id", placeholdersIndex))
@@ -280,8 +279,8 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 			GROUP BY posts.id, users.id
 			ORDER BY posts.created_at DESC
 			LIMIT $%d OFFSET $%d
-		` , 
-		placeholdersIndex, 
+		`,
+		placeholdersIndex,
 		placeholdersIndex+1,
 	)
 
@@ -313,15 +312,15 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 			return nil, err
 		}
 		if nullableCountries[0] == nil {
-			post.Countries=[]string{}
+			post.Countries = []string{}
 		} else {
-			for i := range nullableCountries{
+			for i := range nullableCountries {
 				post.Countries = append(post.Countries, *nullableCountries[i])
 			}
 		}
 		if post.Username == nil {
 			deletedUsername := "[deleted]"
-			post.Username=&deletedUsername
+			post.Username = &deletedUsername
 		}
 		posts = append(posts, post)
 	}
@@ -329,11 +328,11 @@ func FetchPosts(limit int, offset int, subforumID int, userID int, countryIDs []
 	return posts, nil
 }
 
-func FetchPostCount(subforumID int, userID int, countryIDs []int)(int, error){
+func FetchPostCount(subforumID int, userID int, countryIDs []int) (int, error) {
 	var err error
 	var totalPostCount int
 
-	query:= `
+	query := `
 		SELECT COUNT(*) AS total_count
 		FROM posts
 		JOIN users ON posts.user_id=users.id
@@ -346,7 +345,7 @@ func FetchPostCount(subforumID int, userID int, countryIDs []int)(int, error){
 	params := []any{}
 	if len(countryIDs) > 0 {
 		placeholders := []string{}
-		for i := range countryIDs{
+		for i := range countryIDs {
 			placeholders = append(placeholders, fmt.Sprintf("$%d", placeholdersIndex))
 			params = append(params, countryIDs[i])
 			placeholdersIndex++
@@ -368,7 +367,7 @@ func FetchPostCount(subforumID int, userID int, countryIDs []int)(int, error){
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.subforum_id", placeholdersIndex))
 		params = append(params, subforumID)
 		placeholdersIndex++
-	} 
+	}
 
 	if userID > 0 {
 		conditions = append(conditions, fmt.Sprintf("%s=$%d", "posts.user_id", placeholdersIndex))
@@ -388,7 +387,6 @@ func FetchPostCount(subforumID int, userID int, countryIDs []int)(int, error){
 
 	return totalPostCount, err
 }
-
 
 func addPostInTx(tx pgx.Tx, post *PostReqDTO, userID int, subforumID int) (PostResDTO, error) {
 	var postRes PostResDTO

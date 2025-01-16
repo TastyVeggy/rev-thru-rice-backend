@@ -12,11 +12,11 @@ import (
 )
 
 type ShopReqDTO struct {
-	Name string  `json:"name"`
-	Lat  float64 `json:"lat"`
-	Lng  float64 `json:"lng"`
+	Name    string  `json:"name"`
+	Lat     float64 `json:"lat"`
+	Lng     float64 `json:"lng"`
 	Address *string `json:"address"`
-	Country string `json:"country"`
+	Country string  `json:"country"`
 }
 
 type ShopResDTO struct {
@@ -33,10 +33,9 @@ func AddShop(shop *ShopReqDTO, userID int, postID int) (ShopResDTO, error) {
 func UpdateShop(shop *ShopReqDTO, userID int, shopID int) (ShopResDTO, error) {
 	var shopRes ShopResDTO
 
-
 	countryID, err := FetchCountryIDbyName(shop.Country)
 	if err != nil {
-		return shopRes, err 
+		return shopRes, err
 	}
 
 	shopRes.Country = shop.Country
@@ -154,7 +153,7 @@ func FetchShopByID(shopID int) (ShopResDTO, error) {
 	return shop, err
 }
 
-func addShopInTx(tx pgx.Tx, shop *ShopReqDTO,  userID int, postID int) (ShopResDTO, error) {
+func addShopInTx(tx pgx.Tx, shop *ShopReqDTO, userID int, postID int) (ShopResDTO, error) {
 
 	var shopRes ShopResDTO
 

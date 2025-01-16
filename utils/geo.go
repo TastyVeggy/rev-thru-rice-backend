@@ -26,7 +26,7 @@ type Location struct {
 }
 
 func GenerateMapLinkFromLatLng(lat float64, lng float64) string {
-	return fmt.Sprintf("https://www.google.com/maps?q=%f,%f", lat, lng) 
+	return fmt.Sprintf("https://www.google.com/maps?q=%f,%f", lat, lng)
 }
 
 func GetShopLocation(lat float64, lng float64) (*Location, error) {

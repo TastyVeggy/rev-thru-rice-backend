@@ -13,7 +13,7 @@ func GetSubforumsWithPostCount(c echo.Context) error {
 	var countryID *int
 
 	countryIDString := c.QueryParam("country_id")
-	if countryIDString == ""{
+	if countryIDString == "" {
 		countryID = nil
 	} else {
 		countryIDint, err := strconv.Atoi(countryIDString)
