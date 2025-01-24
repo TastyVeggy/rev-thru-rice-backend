@@ -16,7 +16,7 @@ API functions: Authentication; Creation, update and deletion of user, post, revi
    docker compose up -d
    ```
 
-### From source
+### Manually
 
 #### PostgreSQL
 
