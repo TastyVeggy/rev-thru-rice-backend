@@ -1,8 +1,12 @@
 # Rev Thru Rice Backend
+Name: Lim Jinle, Alexius
 
+## Overview
 Rev Thru Rice is a forum designed for travellers in Southeast Asia who enjoy exploring this beautiful region on two bikes.
 
-API functions: Authentication; Creation, update and deletion of user, post, review, comment and rating;
+API functions: Authentication; Creation, update and deletion of user, post, review, comment and rating
+
+Frontend: https://github.com/TastyVeggy/rev-thru-rice-frontend
 
 ## Setup
 
